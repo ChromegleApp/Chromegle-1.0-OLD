@@ -1,0 +1,44 @@
+#tagline button {
+	display: inline-block;
+	position: relative;
+	z-index: 2;
+	border: none;
+	cursor: pointer;
+	margin-right: 25px;
+
+	background-size: 144px 54px;
+	height: 54px; width: 144px;
+
+}
+
+/*noinspection CssUnknownTarget*/
+.pauseButton {
+	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/images/pauseButton.png");
+}
+
+/*noinspection CssUnknownTarget*/
+.unpauseButton {
+	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/images/resumeButton.png");
+}
+
+/*noinspection CssUnknownTarget*/
+.greetingButton {
+	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/images/greetingButton.png");
+}
+
+/*noinspection CssUnknownTarget*/
+.autoSkipButton {
+	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/images/autoSkipButton.png");
+}
+
+/*noinspection CssUnknownTarget*/
+.customDiscordBanner {
+	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/images/discordBanner.png");
+	height: 150px; width: 287px;
+	background-size: 287px 150px;
+	background-color: inherit;
+	border: none;
+	cursor: pointer;
+	z-index: 2;
+	margin-right: 20px;
+}

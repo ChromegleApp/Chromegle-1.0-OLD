@@ -1,0 +1,47 @@
+{
+
+  "name": "Chromegle",
+  "description": "Chromegle - Omegle Chat Automation",
+  "author": "Isaac Kogan",
+  "homepage_url": "https://github.com/isaackogan",
+
+  "manifest_version": 2,
+  "version": "1.0.0",
+  "icons": {
+    "16": "resources/favicon.png",
+    "48": "resources/favicon.png",
+    "128": "resources/favicon.png"
+  },
+
+  "content_scripts": [
+    {
+      "css": [
+        "resources/chromegle.css"
+      ],
+      "js": [
+        "resources/jquery-2.1.1.min.js",
+        "src/chromegle.js",
+        "src/tools.js"
+      ],
+      "matches": [
+        "*://*.omegle.com/*"
+      ]
+    }
+  ],
+
+  "web_accessible_resources": [
+     "/resources/images/*"
+  ],
+
+
+  "incognito": "split",
+  "permissions": [
+    "storage"
+  ],
+  "externally_connectable": {
+    "matches": [
+      "*://*.omegle.com/*"
+    ]
+  }
+
+}
