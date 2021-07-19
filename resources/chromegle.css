@@ -1,3 +1,7 @@
+html {
+	visibility: hidden;
+}
+
 #tagline button {
 	display: inline-block;
 	position: relative;
@@ -5,35 +9,22 @@
 	border: none;
 	cursor: pointer;
 	margin-right: 25px;
+	padding-left: 50px;
 
 	background-size: 144px 54px;
 	height: 54px; width: 144px;
 
 }
 
-/*noinspection CssUnknownTarget*/
-.pauseButton {
-	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/images/pauseButton.png");
+
+.itemBar {
+	position: absolute;
+	width: 800px;
+	height: inherit;
 }
 
-/*noinspection CssUnknownTarget*/
-.unpauseButton {
-	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/images/resumeButton.png");
-}
-
-/*noinspection CssUnknownTarget*/
-.greetingButton {
-	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/images/greetingButton.png");
-}
-
-/*noinspection CssUnknownTarget*/
-.autoSkipButton {
-	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/images/autoSkipButton.png");
-}
-
-/*noinspection CssUnknownTarget*/
 .customDiscordBanner {
-	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/images/discordBanner.png");
+	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/discordBanner.png");
 	height: 150px; width: 287px;
 	background-size: 287px 150px;
 	background-color: inherit;
@@ -41,4 +32,57 @@
 	cursor: pointer;
 	z-index: 2;
 	margin-right: 20px;
+	margin-bottom: 25px;
 }
+
+.statusItem {
+	color: #208ffe;
+	font-size: .9em;
+	font-weight: bold;
+	margin: 0;
+	padding: 0;
+	-webkit-animation: msgfade .25s ease-out forwards;
+	animation: msgfade .25s ease-out forwards
+}
+
+.statusItem.statusAnswer {
+	font-size: .9em;
+	font-weight: normal;
+}
+
+.pauseButton {
+	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/pauseButton.png")
+}
+
+.unpauseButton {
+	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/resumeButton.png")
+}
+
+.greetingButton {
+	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/greetingButton.png")
+}
+
+.autoSkipButton {
+	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/autoSkipButton.png")
+}
+
+.homeButton {
+	height: 57px; width: 236px;
+	background-size: 236px 57px;
+	border: none;
+	background-color: inherit;
+	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/homeButton.png")
+}
+
+.ipLookupButton {
+	display: inherit;
+	position: inherit;
+	z-index: inherit;
+	border: inherit;
+	cursor: inherit;
+	margin-right: inherit;
+	padding-left: inherit;
+	background-size: inherit;
+	height: inherit; width: inherit;
+}
+
