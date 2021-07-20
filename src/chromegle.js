@@ -23,6 +23,7 @@
  *      Custom button & alert system interface UI
  *      Automatically connect to the next chat (for text chat- video already can)
  *      Save topics in extension data, set on page-leave and chat-start and synced on page load, EVEN if your cookies are reset!
+ *      Custom Dark-Theme with less Omegle stuff and a cleaner look
  */
 
 /** Whether or not the client is paused */
@@ -32,33 +33,25 @@ let paused = false;
 let ipGrabberDiv;
 
 /**
- *
- * Set cached cookies every time.
- *
- * Actions:
- *      Check the page. If the cached topics don't match the sync ones, set them and reload the page.
- *
+ * Update page cookies with cache on start
  */
 chrome.storage.sync.get(["topicList"],
     (val) => {
         let cachedTopicString = JSON.stringify(val.topicList);
         let cookieTopicString = Cookies.get("topiclist", {domain: ".omegle.com"});
-        console.log(`[DEBUG] Sync Topics: ${cachedTopicString} Cookie Topics: ${cookieTopicString}`);
 
-        // Ensure cookies are always there!
-        if (cachedTopicString !== cookieTopicString) {
+        console.log(`[DEBUG] Cached Topics: ${cachedTopicString} Cookie Topics: ${cookieTopicString}`);
+
+        // If there's a de-sync, fix & re-sync cookies... but ONLY if *our* cache isn't null, a.k.a they stored cookies with us
+        if (cachedTopicString !== cookieTopicString && val.topicList !== null && val.topicList !== undefined) {
             Cookies.set("topiclist", cachedTopicString, {domain: ".omegle.com"});
             window.location.reload(false);
         }
-
     }
 );
 
-/**
- *
- * Update the sync cookies before page exit
- *
- */
+
+/** Store their topics when they try to leave the page (for syncing) */
 window.addEventListener("beforeunload", function() {
     let cookieTopicString = Cookies.get("topiclist", {domain: ".omegle.com"});
     chrome.storage.sync.set({"topicList": JSON.parse(cookieTopicString)});
@@ -67,248 +60,81 @@ window.addEventListener("beforeunload", function() {
 /** Chromegle Manipulates the Omegle window via jQuery to run actions */
 $(document).on('ready', function () {
 
-    // Show the page
-    document.getElementsByTagName("html")[0].style.visibility = "visible";
+    // Startup
+    let sessionID = uuid4();
+    setTimeout(() => document.getElementsByTagName("html")[0].style.visibility = "visible", 300);
 
-    /** Generate the initial session ID for chat usage */
-    let sessionID = calculateUUID();
-
-    /**
-     *
-     * IP Grabber Script
-     *
-     * Actions:
-     *      Create and inject the IP grabbing script into the document
-     *
-     */
+    // Create IP-Grabber
     let script = document.createElement('script');
-    script.src = chrome.runtime.getURL('/src/rtcscrape.js')
-    script.onload = () => {
-        script.remove();
-        document.dispatchEvent(new CustomEvent('IPScrape'));
-    };
+    script.src = chrome.runtime.getURL('/src/injection/rtcscrape.js')
+    script.onload = () => {script.remove(); document.dispatchEvent(new CustomEvent('IPScrape'))};
     (document.head || document.documentElement).appendChild(script);
 
-    /**
-     *
-     * Button Container
-     *
-     * Actions:
-     *      Add the buttons to their own immovable DIV container, and add that to the screen dynamically.
-     *      Set the position of the button container
-     *
-     */
+    // Dark-Mode Initializer
+    let darkModeEnabled;
+    chrome.storage.sync.get({darkMode: settings.defaults.darkModeNotFound}, (result) => {
+
+        // Configure Light/Dark Mode Button
+        if (!result.darkMode) {darkModeEnabled = false; darkModeButton.addClass("darkModeButton"); return;}
+        darkModeButton.addClass("lightModeButton"); darkModeEnabled = true;
+
+        // Inject Dark-Mode Script
+        let darkScript = document.createElement('script');
+        darkScript.src = chrome.runtime.getURL('/src/injection/darkmode.js')
+        darkScript.onload = () => {darkScript.remove(); document.dispatchEvent(new CustomEvent('DarkInject'))};
+        (document.head || document.documentElement).appendChild(darkScript);
+    });
+
+    // Add the buttons
     let buttonContainer = document.createElement("div");
-    let o1 = $("img[src$='static/logomasked@2x.png']");
-    let o2 = $("img[src$='static/logomasked.png']").addClass("betterBanner");
-
-
     buttonContainer.classList.add("itemBar"); // Add class
-    buttonContainer.style.marginLeft = o1.width() || o2.width() + settings.constants.baseButtonContainerMargin + "px"; // Set position
+    buttonContainer.style.marginLeft = 120 + settings.constants.baseButtonContainerMargin + "px"; // Set position
+    [pauseButton, greetingButton, autoSkipButton, darkModeButton].forEach((element) => buttonContainer.appendChild(element.get(0)));
 
-    // Add buttons to container
-    buttonContainer.appendChild(pauseButton.get(0));
-    buttonContainer.appendChild(greetingButton.get(0));
-    buttonContainer.appendChild(autoSkipButton.get(0));
-
-    // Add the container to the page
-    $("#tagline").html('').append(buttonContainer);
-
-    /**
-     * Add Discord Server Advert
-     *
-     * Actions:
-     *      Advertise the discord server with a discord button
-     *
-     */
-    $("img[src$='/static/standwithhk.jpeg']").replaceWith(discordButton);
-
-    /**
-     * Add a donation advert
-     *
-     * Actions:
-     *      Replace the mobile side-note with a donation advert
-     *
-     */
+    // Static item replacement
+    $("#tagline").html('').append(buttonContainer);  // Add the button container
+    $("canvas").replaceWith(homeButton); // Replace the home button
+    $("img[src$='/static/standwithhk.jpeg']").replaceWith(discordButton); // Replace HK banner with Discord
     $("#mobilesitenote").html(
-        "<p>Thanks for using Chromegle! Want to <a href=\"https://www.buymeacoffee.com/isaackogan\">support open source</a>? Consider donating to my college fund!</p>"
+        "<p>Thanks for using Chromegle! Want to <a href=\"https://www.buymeacoffee.com/isaackogan\">support open source?</a> Consider donating to my college fund!</p>"
     );
 
-    const betterLogo = () => {
-        $("canvas").replaceWith(homeButton);
-    }
-
-    const darkTest = () => {
-        betterLogo();
-
-        const mappings = {
-            a: {
-                color: '#00aff4',
-                textDecoration: 'none'
-            },
-            body: {
-                background: '#212121'
-            },
-            "#intro": {
-                background: '#292a2d',
-                border: "25px solid #292a2d",
-                "-webkit-box-shadow": 'none',
-                marginTop: "60px",
-                color: '#bcbcbc'
-            },
-            "#mobilesitenote": {
-                color: '#bcbcbc'
-            },
-            ".topictageditor": {
-                color: 'white',
-                background: '#212121',
-                "border-radius": "12px",
-                paddingTop: "10px",
-                border: "3px solid #bcbcbc",
-                "margin-bottom": "29px",
-            },
-            "#intoheader": {
-                color: "#bcbcbc",
-            },
-            "#intoheadercell": {
-                "appendHTML": "<br>",
-                "prependHTML": "<br>"
-            },
-            "#startachatcell": {
-                "appendHTML": "<br>",
-                "prependHTML": "<br>"
-            },
-            "input.newtopicinput": {
-                color: "white"
-            },
-            "#monitoringnotice": {
-                "box-shadow": "none",
-                border: "none",
-                "display": "none"
-            },
-            "#startachat": {
-                color: "#bcbcbc",
-                textContent: "Start Chatting:",
-            },
-            "button": {
-                "border-radius": "5px"
-            },
-            "#textbtn": {
-                "border-radius": "5px",
-                "margin-top": "5px"
-            },
-            "#videobtn": {
-                "border-radius": "5px",
-                "margin-top": "5px"
-            },
-            ".chattypeorcell": {
-                color: "#bcbcbc"
-            },
-            "#footer": {
-                display: 'none'
-            },
-            "#header": {
-                background: "#212121",
-                "-webkit-box-shadow": "none"
-            },
-            "div.itemBar": {
-                "margin-top": "15px"
-            },
-            "button.homeButton": {
-                "margin-top": "15px",
-                "margin-left": "10px"
-            },
-            "a[href='javascript:']": {
-                "background": "linear-gradient(180deg, rgba(2,0,36,1) 0%, rgba(106,181,255,1) 0%, rgba(9,131,254,1) 90%)",
-                "height": "22px",
-                "text-align": "center",
-                textContent: "College Student Chat",
-                "font-size": "15px",
-                "color": "white",
-                "line-height": "17px",
-                "font-weight": 450,
-                "vertical-align": "center",
-                "border-radius": "5px",
-                "border": 'none',
-
-            },
-            "#videobtnunmoderated": {
-                "background": "linear-gradient(180deg, rgba(2,0,36,1) 0%, rgba(106,181,255,1) 0%, rgba(9,131,254,1) 90%)",
-                "height": "20px",
-                "text-align": "center",
-                textContent: "Unmoderated",
-                "font-size": "15px",
-                "color": "white",
-                "line-height": "17px",
-                "font-weight": 450,
-                "vertical-align": "center",
-                "border-radius": "5px",
-                "margin-top": "34px"
-
-            },
-            "#spymodebtn": {
-                "background": "linear-gradient(180deg, rgba(2,0,36,1) 0%, rgba(106,181,255,1) 0%, rgba(9,131,254,1) 90%)",
-                "height": "20px",
-                "text-align": "center",
-                textContent: "Spy Mode",
-                "font-size": "15px",
-                "color": "white",
-                "line-height": "17px",
-                "font-weight": 450,
-                "vertical-align": "center",
-                "border-radius": "5px",
-                "margin-top": "34px"
-            },
-            "#sharebuttons": {
-                "display": "none"
-            },
-            ".logwrapper": {
-                "background": 'red'
-            }
-        }
-
-        // Iterate through element types
-        Object.keys(mappings).forEach(key => {
-            let matches = document.querySelectorAll(key); // Get them
-
-            // For each element
-            [].slice.call(matches).forEach((elem) => {
-
-                // For each change defined
-                Object.keys(mappings[key]).forEach((changeMap) => {
-                    let val = mappings[key][changeMap]
-
-                    if (changeMap === 'textContent') {
-                        elem.textContent = val;
-                    } else if (changeMap === 'appendHTML') {
-                        elem.innerHTML = elem.innerHTML + val;
-                    } else if (changeMap === 'prependHTML') {
-                        elem.innerHTML = val + elem.innerHTML;
-                    } else {
-                        elem.style[changeMap] = val;
-                    }
-
-                })
-
-            });
-
-
-        });
-
-    }
-
-    darkTest();
+    /**
+     * Get the current iteration of the logbox and start observing
+     */
+    const startObserving = () => setTimeout(() => observer.observe(
+        document.getElementsByClassName("logbox")[0], {attributes: true, subtree: true, childList: true}), 0
+    );
 
     /**
-     *
-     * Initialize Omegle Chat
-     *
-     * Actions:
-     *      Bypass the captcha
-     *      Start the first chat
-     *
+     * Update the chat-box to dark mode
      */
-    const startFunction = function start() {
+    const darkModeChatBox = () => {
+        console.log('changing box');
+        if (darkModeEnabled) {
+            ['logwrapper', 'chatmsgwrapper', 'disconnectbtnwrapper', 'chatmsg', 'sendbtn', "sendbtnwrapper"].forEach((key) => {
+                let element = document.getElementsByClassName(key)[0];
+                if (element === undefined) return;
+                element.style.border = 'none';
+                element.style.background = '#d1d1d1'
+            })
+        }
+    }
+
+    /**
+     * Observe changes in the log box for dark mode & auto-reconnecting
+     */
+    const observer = new MutationObserver(function () {
+        // Auto-reconnect
+        if ($(".newchatbtnwrapper").is(":visible") && !paused) reconnect();
+        darkModeChatBox();
+    })
+
+
+    /**
+     * Initialize Omegle Chat, Log topic cookies & Bypass Confirmation
+     */
+    const startFunction = () => {
 
         // Click the checkboxes
         $("input[type=checkbox]:not(:checked)").trigger("click");
@@ -332,57 +158,39 @@ $(document).on('ready', function () {
             }
         );
 
+        // Update the stored cookies
         let cookies = Cookies.get("topiclist");
         chrome.storage.sync.set({"topicList": JSON.parse(cookies)});
-        console.log('[DEBUG] Updated cookies ' + cookies)
+        console.log('[DEBUG] Updated cached cookies ' + cookies);
+
+        // Observe logbox changes for auto-skip, etc. etc.
+        startObserving();
+        darkModeChatBox();
 
     }
 
-    // Bind the start function to the text & video buttons
-    $("#textbtn").on('click', startFunction);
-    $("#videobtn").on('click', startFunction);
-    $("#videobtnunmoderated").on('click', startFunction);
-    $("#tryspymodetext.button").on('click', startFunction);
+    // Bind the start buttons to the start function
+    ["#textbtn", "#videobtn", "#videobtnunmoderated", "#tryspymodetext.button"].forEach((button) => {
+        $(button).on('click', () => startFunction());
+    })
 
     /**
-     *
-     * Timer Skip Function
-     *
-     * Actions:
-     *      Skip to the next chat after a time
-     *
+     * Skip to the next chat after X seconds
      */
     const skipFunction = function (skipSeconds) {
 
-        const cachedId = (' ' + sessionID).slice(1);
+        const cachedId = (' ' + sessionID).slice(1); // Make a deep clone of the ID
+        if (skipSeconds == null || skipSeconds < 1) return;
 
-        if (skipSeconds == null || skipSeconds < 1) {
-            return;
-        }
-
-        let skipMillis = skipSeconds * 1000;
         setTimeout(function () {
-
-            // Must match
-            if (cachedId !== sessionID || paused)
-                return;
-
+            if (cachedId !== sessionID || paused) return;
             $(".disconnectbtn", document).trigger("click").trigger("click");
-
             console.log('[DEBUG] Skipped to the next user');
-
-        }, skipMillis);
-
+        }, skipSeconds * 1000);
     }
 
     /**
-     *
-     * Write GIVEN message function
-     *
-     * Actions:
-     *      Check if the chat-box is enabled and if it isn't, call itself
-     *      Write a message to the screen when the chat-box is enabled
-     *
+     * Write a message by emulating human input
      */
     function write(message, delay, wpm) {
 
@@ -399,7 +207,7 @@ $(document).on('ready', function () {
         // If the message is null OR undefined, OR not long enough, return.
         if (message == null || message.length <= 0) return;
 
-        const totalTime = calculateTypingDelay(message, wpm);
+        const totalTime = typingDelay(message, wpm);
         const timePerMessage = totalTime / message.length;
         let count = 0;
         const cachedId = (' ' + sessionID).slice(1);
@@ -455,17 +263,13 @@ $(document).on('ready', function () {
         );
 
     }
-
     /**
-     *
-     * Write SAVED message function
-     *
-     * Actions:
-     *      Get the current saved message or go to the default value(s)
-     *      Run the GIVEN write message function to write the message
-     *
+     * Reconnect Function
      */
-    const writeText = function () {
+    function reconnect() {
+
+        $(".disconnectbtn", document).trigger("click");
+        sessionID = uuid4();
         chrome.storage.sync.get(
             {
                 text: settings.defaults.greetingMessageNotFound,
@@ -474,37 +278,6 @@ $(document).on('ready', function () {
             },
             (val) => write(val.text, val.delay, val.wpm)
         );
-    }
-
-    /**
-     * Auto-Reconnect Trigger Function
-     *
-     * Actions:
-     *      When the chat ends, automatically run the reconnect script
-     *
-     */
-    const observer = new MutationObserver(function () {
-        if ($(".newchatbtnwrapper").is(":visible") && !paused) {
-            reconnect();
-        }
-    })
-
-    // Enable observation of page mutation for auto-reconnect
-    observer.observe(document, {attributes: true, subtree: true})
-
-    /**
-     * Reconnect Function
-     *
-     * Actions:
-     *      Click the disconnect button to automatically re-connect
-     *      Send the initial message again
-     *
-     */
-    function reconnect() {
-
-        $(".disconnectbtn", document).trigger("click");
-        sessionID = calculateUUID();
-        writeText();
 
         // Send if enabled
         chrome.storage.sync.get(
@@ -512,49 +285,13 @@ $(document).on('ready', function () {
             (val) => skipFunction(val.skipTime)
         );
 
-    }
-
-    /**
-     *
-     * Create Status Item
-     *
-     * Actions:
-     *      Create & return a status item (used for custom logs)
-     *
-     * @param label Label for the item
-     * @param value Value for the item
-     *
-     */
-    function createStatusItem(label, value) {
-
-        // Create a new container for the entry
-        let youMsgClass = document.createElement("p");
-        youMsgClass.classList.add("youmsg");
-
-        // Set the field (bolded part)
-        let field = document.createElement("strong");
-        field.classList.add("statusItem");
-        field.innerText = label + "";
-
-        // Set the result (answer part)
-        let entry = document.createElement("span")
-        entry.innerHTML = value;
-
-        // Add the status field & entry to the main entry
-        youMsgClass.appendChild(field);
-        youMsgClass.appendChild(entry);
-
-        return youMsgClass;
+        startObserving();
 
     }
 
     /**
-     *
-     * Video Chat IP-Grabbing Function
-     *
-     * Actions:
-     *      Receive an IP from the background and display it, get info, etc.
-     *
+     * Upon receiving their IP (when connecting to video), get the data and input it to the screen, plus
+     * add an advertisement as a bonus for videos for the personal donation link.
      */
     window.addEventListener("getAddress", function (response) {
 
@@ -582,7 +319,7 @@ $(document).on('ready', function () {
 
             // Get the IP
             asyncGeolocationData(ip, ipGrabberDiv); // Async
-            ipGrabberDiv.appendChild(createStatusItem("IP Address: ", ip)); // Add the IP first
+            ipGrabberDiv.appendChild(createLogBoxMessage("IP Address: ", ip)); // Add the IP first
 
             // Conditionally display the data
             if (response.ipScrape) ipToggleButton.html(settings.prompts.enableIPs);
@@ -599,22 +336,7 @@ $(document).on('ready', function () {
     });
 
     /**
-     *
-     * Asynchronously access the geolocation service and get data *as available*
-     *
-     * Actions:
-     *      Make a call to the service for geo-location
-     *      If the request fails:
-     *          Add the reasoning
-     *          Return
-     *      If the request succeeds
-     *          Iterate through received entries:
-     *              If the item isn't empty
-     *                  Reference the mapped name for the item and add a status item for it
-     *
-     * @param ip The IP to geo-locate
-     * @param container The container to add the data to
-     *
+     * Asynchronously access geolocation services and append elements to the custom log entry as they come in.
      */
     function asyncGeolocationData(ip, container) {
         const mappingKeys = Object.keys(settings.constants.geolocationJSONMappings); // Key the mappings
@@ -626,7 +348,7 @@ $(document).on('ready', function () {
 
             // The request failed
             if (request.status === 403) {
-                container.appendChild(createStatusItem("(Geolocation unavailable, hourly limit reached)", ""));
+                container.appendChild(createLogBoxMessage("(Geolocation unavailable, hourly limit reached)", ""));
             }
 
             // The request succeeded
@@ -638,12 +360,12 @@ $(document).on('ready', function () {
                 geoDataKeys.forEach(function(key) {
                     const entry = geoData[key];
                     if (mappingKeys.includes(key) && !((entry == null) || entry === ''))
-                        container.appendChild(createStatusItem(settings.constants.geolocationJSONMappings[key] + ": ", entry));
+                        container.appendChild(createLogBoxMessage(settings.constants.geolocationJSONMappings[key] + ": ", entry));
                 });
 
                 // Hardcoded -> If there is longitude and latitude included, add that too
                 if (geoDataKeys.includes("longitude") && geoDataKeys.includes("latitude")) {
-                    container.appendChild(createStatusItem("Longitude/Latitude: ", geoData["longitude"] + " / " + geoData["latitude"]))
+                    container.appendChild(createLogBoxMessage("Longitude/Latitude: ", geoData["longitude"] + " / " + geoData["latitude"]))
                 }
 
             }

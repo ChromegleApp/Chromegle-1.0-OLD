@@ -1,23 +1,14 @@
 /**
  *
- * Utility file containing all of the program's buttons
- *
- */
-
-/**
- *
  * Custom Pause Button
  *
- * Actions:
- *      Pause the Omegle Client
- *      Resume the Omegle Client
  */
 const pauseButton = $("<button></button>")
     .addClass('unpauseButton')
     .addClass('pauseButton')
     .toggleClass('unpauseButton')
 
-    .bind('click', function () {
+    .on('click', function () {
         paused = !paused;
         $(this).toggleClass('unpauseButton').toggleClass('pauseButton');
 
@@ -25,12 +16,8 @@ const pauseButton = $("<button></button>")
 
 /**
  *
- * Custom Greeting Button
+ * Greeting / Delay / WPM Editor
  *
- * Actions:
- *      Set a custom auto-message
- *      Set a custom auto-message delay
- *      Set a typing speed words-per-minute
  */
 const greetingButton = $("<button class='greetingButton'></button>")
 
@@ -39,46 +26,50 @@ const greetingButton = $("<button class='greetingButton'></button>")
 
         chrome.storage.sync.get(["text", "delay", "wpm"], function (val) {
 
-            // New Greeting
-            let newGreeting = prompt(
-                settings.prompts.greetingMessage,
-                (val["text"] || val["text"] === 0) || settings.defaults.greetingMessage
-            );
+            /*
+            Get the response
+             */
 
-            // New Delay
-            let newDelay = prompt(
-                settings.prompts.greetingDelay,
-                (!(val["delay"]) && val["delay"] !== 0) ? settings.defaults.greetingDelay : val["delay"]
-            );
+            let newGreeting = prompt(settings.prompts.greetingMessage,
+                (val.text === undefined || val.text == null) ? settings.defaults.greetingMessageNotFound : val.text);
+            let newWPM = prompt(settings.prompts.wpmSpeed,
+                (val.wpm === undefined || val.wpm == null) ? settings.defaults.wpmNotFound : val.wpm);
+            let newDelay = prompt(settings.prompts.greetingDelay,
+                (val.delay === undefined || val.delay == null) ? settings.defaults.greetingDelayNotFound : val.delay);
 
-            if (!isNumeric(newDelay)) newDelay = 0;
+            let changes = {}
 
-            // New WPM
-            let newWPM = prompt(
-                settings.prompts.wpmSpeed,
-                (!(val["wpm"]) && val["wpm"] !== 0) ? settings.defaults.wpmSpeed : val["wpm"]
-            );
+            /*
+            Validate the response
+             */
 
-            if (!isNumeric(newWPM)) newWPM = 0;
+            if (newGreeting !== null) {
+                changes["text"] = newGreeting;
+            }
 
-            // Null -> Ignore Input
-            newGreeting = newGreeting === null ? val["text"] : newGreeting;
-            newDelay = newDelay == null ? val["delay"] : newDelay;
-            newWPM = newWPM == null ? val["wpm"] : newWPM;
+            if (newWPM !== null && isNumeric(newWPM)) {
+                if (newWPM < 0) newWPM = 0;
+                if (newWPM > 1000) newWPM = 1000;
+                changes["wpm"] = newWPM;
+            }
 
-            chrome.storage.sync.set(
-                {"text": newGreeting, "delay": newDelay, "wpm": newWPM}
-            );
+            if (newDelay !== null && isNumeric(newDelay)) {
+                if (newDelay < 0) newDelay = 0;
+                if (newDelay > 1000) newDelay = 1000;
+                changes["delay"] = newDelay;
+
+            }
+
+            // Update whichever choices got filled
+            console.log(changes);
+            chrome.storage.sync.set(changes);
 
         });
     });
 
 /**
  *
- * Custom Auto-Skip Button
- *
- * Actions:
- *      Set how fast to skip after you connect
+ * AutoSkip delay editor
  *
  */
 const autoSkipButton = $("<button class='autoSkipButton'></button>")
@@ -88,72 +79,79 @@ const autoSkipButton = $("<button class='autoSkipButton'></button>")
 
         chrome.storage.sync.get("skipTime", function (val) {
 
-            if (!(val["skipTime"]) && val["skipTime"] !== 0) {
-                val["skipTime"] = settings.defaults.skipTime;
+            // Get the new skip time
+            let newSkipTime = prompt(settings.prompts.skipTime,
+                (val.skipTime === undefined || val.skipTime == null) ? settings.defaults.skipTime : val.skipTime);
+
+            // If there's a valid input
+            if (newSkipTime !== null && isNumeric(newSkipTime)) {
+
+                // Clamp values to 0, or greater than 3
+                if (newSkipTime < 0) newSkipTime = 0;
+                else if (newSkipTime > 0 && newSkipTime < 3) newSkipTime = 3;
+
+                chrome.storage.sync.set({"skipTime": newSkipTime});
+
             }
-
-
-            // Get the greeting
-            let newSkipTime = prompt(
-                settings.prompts.skipTime, val["skipTime"]
-            );
-
-            // Parse edge-cases
-            if (isNumeric(newSkipTime)) {
-                if ((newSkipTime > 0 && newSkipTime < 1))
-                    newSkipTime = settings.constants.skipTimeMinimumValue; // Min valid
-                if (newSkipTime < 0) newSkipTime = settings.defaults.skipTimeNotFound // Disable It
-            } else {
-                // Covers empty entries, non-integer entries
-                newSkipTime = settings.defaults.skipTimeNotFound;
-            }
-            chrome.storage.sync.set({"skipTime": newSkipTime});
 
         });
     });
 
-
 /**
- * A button to promote the Discord
  *
- * Actions:
- *      Click to join the Discord
+ * Dark-Mode Toggle Button
  *
  */
-const discordButton = $("<button class='customDiscordBanner'></button>")
+const darkModeButton = $("<button></button>")
 
-    // Bind the click action to a new function
     .on('click', function () {
 
-        window.open(settings.constants.discordInviteURL);
+        chrome.storage.sync.get(["darkMode"], (result) => {
+            let darkEnabled;
+
+            if (result.darkMode == null) darkEnabled = settings.defaults.darkModeNotFound;
+            else darkEnabled = !result.darkMode;
+
+            console.log('[DEBUG] Dark mode enabled: ' + darkEnabled);
+            chrome.storage.sync.set({darkMode: darkEnabled})
+
+            window.location.reload(false);
+            console.log('l')
+
+        });
 
     });
 
 /**
  *
- * IP Toggle Button
+ * A button to promote the Discord
+ *
+ */
+const discordButton = $("<button class='customDiscordBanner'></button>")
+    .on('click', function () {window.open(settings.constants.discordInviteURL);});
+
+/**
+ *
+ * Button to toggle showing IP details in video chats
  *
  */
 const ipToggleButton = $("<button style='margin-bottom: 8px'></button>")
     // Bind the click action to a new function
     .on('click', () => chrome.storage.sync.get(["ipScrape"], (val) => {
         let enabled = val.ipScrape || settings.defaults.ipScrapeEnabledNotFound;
-
-        ipGrabberDiv.style.display = enabled ? "none" : "" // Hide/Display IP Data
+        ipGrabberDiv.style.display = enabled ? "none" : ""
         ipToggleButton.html(enabled ? settings.prompts.disableIPs : settings.prompts.enableIPs);
-
         chrome.storage.sync.set({"ipScrape": !enabled});
     }));
 
 
 /**
  *
- * Custom home button
+ * Custom Home button
  *
  */
 const homeButton = $("<button class='homeButton'></button>")
-    // Bind the click action to a new function
     .on('click', function () {
-        document.location.href = "";
+        window.location.reload(false);
     });
 

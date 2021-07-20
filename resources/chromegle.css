@@ -58,6 +58,14 @@ html {
 	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/resumeButton.png")
 }
 
+.darkModeButton {
+	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/darkModeButton.png")
+}
+
+.lightModeButton {
+	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/lightModeButton.png")
+}
+
 .greetingButton {
 	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/greetingButton.png")
 }
@@ -86,3 +94,12 @@ html {
 	height: inherit; width: inherit;
 }
 
+.loading {
+	font-size: 60px;
+	color: #bcbcbc;
+	position:fixed;
+	z-index: 100;
+	top: 38%;
+	width:100%;
+	text-align: center;
+}

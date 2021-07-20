@@ -7,17 +7,12 @@
 
   "manifest_version": 3,
   "version": "1.0.0",
-  "icons": {
-    "16": "resources/favicon.png",
-    "48": "resources/favicon.png",
-    "128": "resources/favicon.png"
-  },
+  "icons": {"16": "resources/favicon.png", "48": "resources/favicon.png", "128": "resources/favicon.png"},
 
   "content_scripts": [
     {
       "css": [
-        "resources/chromegle.css",
-        "resources/darkmode.css"
+        "resources/chromegle.css"
       ],
       "js": [
         "resources/jquery-2.1.1.min.js",
@@ -34,20 +29,13 @@
 
   "web_accessible_resources": [
     {
-      "resources": ["/resources/buttons/*", "/resources/images/*","src/injection.js"],
+      "resources": ["/resources/buttons/*", "/resources/images/*","src/injection/rtcscrape.js", "/src/injection/darkmode.js"],
       "matches": ["*://*.omegle.com/*"]
     }
   ],
 
   "incognito": "split",
-  "permissions": [
-    "storage"
-  ],
-
-  "externally_connectable": {
-    "matches": [
-      "*://*.omegle.com/*"
-    ]
-  }
+  "permissions": ["storage"],
+  "externally_connectable": {"matches": ["*://*.omegle.com/*"]}
 
 }
