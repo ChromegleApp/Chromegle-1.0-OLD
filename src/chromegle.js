@@ -45,7 +45,7 @@ chrome.storage.sync.get(["topicList"],
         // If there's a de-sync, fix & re-sync cookies... but ONLY if *our* cache isn't null, a.k.a they stored cookies with us
         if (cachedTopicString !== cookieTopicString && val.topicList !== null && val.topicList !== undefined) {
             Cookies.set("topiclist", cachedTopicString, {domain: ".omegle.com"});
-            window.location.reload(false);
+            window.location.reload(true);
         }
     }
 );
@@ -57,12 +57,13 @@ window.addEventListener("beforeunload", function() {
     chrome.storage.sync.set({"topicList": JSON.parse(cookieTopicString)});
 }, false);
 
+
 /** Chromegle Manipulates the Omegle window via jQuery to run actions */
 $(document).on('ready', function () {
 
     // Startup
     let sessionID = uuid4();
-    setTimeout(() => document.getElementsByTagName("html")[0].style.visibility = "visible", 300);
+    setTimeout(() => document.getElementsByTagName("html")[0].style.visibility = "visible", 400);
 
     // Create IP-Grabber
     let script = document.createElement('script');
@@ -78,6 +79,9 @@ $(document).on('ready', function () {
         if (!result.darkMode) {darkModeEnabled = false; darkModeButton.addClass("darkModeButton"); return;}
         darkModeButton.addClass("lightModeButton"); darkModeEnabled = true;
 
+        // We like a darker loading screen
+        $("html").css("background-color", "#212121")
+
         // Inject Dark-Mode Script
         let darkScript = document.createElement('script');
         darkScript.src = chrome.runtime.getURL('/src/injection/darkmode.js')
@@ -88,7 +92,7 @@ $(document).on('ready', function () {
     // Add the buttons
     let buttonContainer = document.createElement("div");
     buttonContainer.classList.add("itemBar"); // Add class
-    buttonContainer.style.marginLeft = 120 + settings.constants.baseButtonContainerMargin + "px"; // Set position
+    buttonContainer.style.marginLeft = 240 + settings.constants.baseButtonContainerMargin + "px"; // Set position
     [pauseButton, greetingButton, autoSkipButton, darkModeButton].forEach((element) => buttonContainer.appendChild(element.get(0)));
 
     // Static item replacement
@@ -98,26 +102,47 @@ $(document).on('ready', function () {
     $("#mobilesitenote").html(
         "<p>Thanks for using Chromegle! Want to <a href=\"https://www.buymeacoffee.com/isaackogan\">support open source?</a> Consider donating to my college fund!</p>"
     );
+    $("#sharebuttons").css("display", "none");
 
     /**
      * Get the current iteration of the logbox and start observing
      */
-    const startObserving = () => setTimeout(() => observer.observe(
-        document.getElementsByClassName("logbox")[0], {attributes: true, subtree: true, childList: true}), 0
-    );
+    const startObserving = () => {
+
+        // Initialize the chat box since we won't have done that yet
+        darkModeChatBox();
+
+        // Begin observing
+        setTimeout(() => observer.observe(
+            document.getElementsByClassName("logbox")[0], {attributes: true, subtree: true, childList: true}), 0
+        );
+    }
 
     /**
      * Update the chat-box to dark mode
      */
     const darkModeChatBox = () => {
-        console.log('changing box');
+
         if (darkModeEnabled) {
-            ['logwrapper', 'chatmsgwrapper', 'disconnectbtnwrapper', 'chatmsg', 'sendbtn', "sendbtnwrapper"].forEach((key) => {
+
+            // Set box colouring & change all text to our grey-white colour
+            ['logwrapper', 'chatmsgwrapper', 'disconnectbtnwrapper', 'disconnectbtn','chatmsg', 'sendbtn', "sendbtnwrapper"].forEach((key) => {
                 let element = document.getElementsByClassName(key)[0];
                 if (element === undefined) return;
                 element.style.border = 'none';
-                element.style.background = '#d1d1d1'
+                element.style.color = '#d1d1d1';
+                element.style.background = '#292a2d'
             })
+
+            // Status log messages
+            let logMessages = document.getElementsByClassName("statuslog");
+            for (let i = 0; i < logMessages.length ; i++) {
+                let item = logMessages.item(i);
+                if (item == null) continue;
+                item.style.color = '#d1d1d1'
+            }
+
+
         }
     }
 
@@ -163,9 +188,19 @@ $(document).on('ready', function () {
         chrome.storage.sync.set({"topicList": JSON.parse(cookies)});
         console.log('[DEBUG] Updated cached cookies ' + cookies);
 
+        // Replace their logo with a new logo (invalidates their JS so we can run out own functions off the logo button)
+        setTimeout(() => {
+            let newLogo = document.createElement("h2");
+            newLogo.id = "betterLogo";
+            let oldLogo = document.getElementById('logo');
+            while (oldLogo.childNodes.length > 0) newLogo.appendChild(oldLogo.childNodes[0]);
+            oldLogo.replaceWith(newLogo);
+
+        }, 150);
+
         // Observe logbox changes for auto-skip, etc. etc.
         startObserving();
-        darkModeChatBox();
+
 
     }
 

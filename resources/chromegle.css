@@ -16,11 +16,21 @@ html {
 
 }
 
+#betterLogo {
+	padding: 0;
+	float: left;
+	font-size: 1em;
+	margin: 0 5em 0 .5em;
+}
+
+
 
 .itemBar {
 	position: absolute;
-	width: 800px;
+	width: 680px;
 	height: inherit;
+	z-index: 2;
+	background-color: white;
 }
 
 .customDiscordBanner {

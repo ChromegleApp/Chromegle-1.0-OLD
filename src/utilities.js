@@ -22,7 +22,7 @@ const settings = {
         wpmNotFound: 40,
         skipTimeNotFound: 0,
         ipScrapeEnabledNotFound: false,
-        skipTime: 1,
+        skipTime: 0,
 
     },
 

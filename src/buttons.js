@@ -109,13 +109,14 @@ const darkModeButton = $("<button></button>")
         chrome.storage.sync.get(["darkMode"], (result) => {
             let darkEnabled;
 
-            if (result.darkMode == null) darkEnabled = settings.defaults.darkModeNotFound;
+            // Do the opposite of the default since they're clicking (therefore SWITCHING FROM the default)
+            if (result.darkMode == null) darkEnabled = !settings.defaults.darkModeNotFound;
             else darkEnabled = !result.darkMode;
 
             console.log('[DEBUG] Dark mode enabled: ' + darkEnabled);
             chrome.storage.sync.set({darkMode: darkEnabled})
 
-            window.location.reload(false);
+            window.location.reload(true);
             console.log('l')
 
         });
@@ -152,6 +153,8 @@ const ipToggleButton = $("<button style='margin-bottom: 8px'></button>")
  */
 const homeButton = $("<button class='homeButton'></button>")
     .on('click', function () {
-        window.location.reload(false);
+        // Only reload in the chat window (don't allow reloading on the main page)
+        if (document.getElementById("intro") === null) window.location.reload(true);
+
     });
 
