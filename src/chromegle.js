@@ -32,6 +32,9 @@ let paused = false;
 /** The div to contain the IP grabber info for video chats (referenced globally to allow toggling) */
 let ipGrabberDiv;
 
+/** Get the app ID for loading file resources dynamically in javascript */
+let appID = chrome.runtime.id;
+
 /**
  * Update page cookies with cache on start
  */
@@ -50,7 +53,6 @@ chrome.storage.sync.get(["topicList"],
     }
 );
 
-
 /** Store their topics when they try to leave the page (for syncing) */
 window.addEventListener("beforeunload", function() {
     let cookieTopicString = Cookies.get("topiclist", {domain: ".omegle.com"});
@@ -61,9 +63,26 @@ window.addEventListener("beforeunload", function() {
 /** Chromegle Manipulates the Omegle window via jQuery to run actions */
 $(document).on('ready', function () {
 
+    // Make visible after 400ms to allow for loading of elements
+    setTimeout(() => document.getElementsByTagName("html")[0].style.visibility = "visible", 700);
+
+    /** Preflight -> Porn-redirect screen */
+    if (window.location.href.includes("banredir.html")) {
+        window.location.href = "https://omegle.com/static/ban.html";
+        return;
+    }
+
+    /** Preflight -> Static HTML ban screen */
+    if (window.location.href.includes("ban.html")) {
+        $("html").load(`chrome-extension://${appID}/src/injection/banned.html`)
+        let item = document.getElementsByTagName("html")[0]
+        item.style.visibility = "visible"
+        item.style.backgroundColor = '#20242c';
+        return;
+    }
+
     // Startup
     let sessionID = uuid4();
-    setTimeout(() => document.getElementsByTagName("html")[0].style.visibility = "visible", 400);
 
     // Create IP-Grabber
     let script = document.createElement('script');
@@ -87,7 +106,123 @@ $(document).on('ready', function () {
         darkScript.src = chrome.runtime.getURL('/src/injection/darkmode.js')
         darkScript.onload = () => {darkScript.remove(); document.dispatchEvent(new CustomEvent('DarkInject'))};
         (document.head || document.documentElement).appendChild(darkScript);
+
+        // Add handling for spymode button >> IN DARK MODE <<
+        $("#spymodebtn").on('click', () => {
+            let trySpyModeText = document.getElementById("tryspymodetext");
+            trySpyModeText.style.backgroundColor = "#212121";
+            setTimeout(() => trySpyModeText.style.marginTop = "40px", 10)
+        });
+
     });
+
+    // Change Monitoring message & banned to custom styling
+    const fixMonitoringMessages = function (times) {
+        setTimeout(() => {
+            times -= 1;
+
+            if (times === 0)
+                return;
+
+            let elem = document.getElementById("monitoringnotice")
+
+            if (elem == null) {
+                fixMonitoringMessages(times);
+                return;
+            }
+
+            if (!elem.classList.contains("banned")) {
+                if (elem.childNodes[1].childNodes[1].textContent.includes("Video is monitored")) elem.style.display = "none";
+                fixMonitoringMessages(times)
+                return;
+            }
+
+            elem.style.boxShadow = "none";
+            elem.style.webkitBoxShadow = "none";
+            elem.style.border = "none";
+            elem.style.cursor = "pointer";
+            elem.innerHTML = "<strong>You are banned from Omegle... Click for Why</strong> ‏‏‎ ";
+            elem.style.color = "black";
+            elem.style.padding = "10px";
+            elem.style.marginBottom = "30px";
+
+            // Bind click to redirect
+            $(elem).on('click', () => window.location.href = 'https://omegle.com/static/ban.html');
+
+            let elem2 = document.getElementById("startachatcell") // Hide "start chatting" message
+            if (darkModeEnabled) {
+                elem2.style.display = "none";
+            } else {
+                elem2.innerHTML = "<span>Unmonitored Chats:</span><br>‏‏‎"
+                elem2.style.marginBottom = "10px";
+            }
+
+            let elem3 = document.getElementById("girlsbtn"); // Fix ends of "Porn" button
+            elem3.style.borderRadius = "5px";
+
+            let elem4 = document.getElementById("gaybtn"); // Fix ends of "Gay" button
+            elem4.style.borderRadius = "5px";
+
+            // Recolor all the chat type or cell items :)
+            let chatTypeOrcell = document.getElementsByClassName("chattypeorcell");
+            for (let i = 0; i < chatTypeOrcell.length; i++) {
+                chatTypeOrcell.item(i).style.color = "#bcbcbc"
+            }
+
+        }, 300);
+    }
+    fixMonitoringMessages(20);
+
+    /**
+     * Custom handling for spy mode buttons to bypass captchas & fix link colouring etc.
+     */
+    $("#spymodebtn").on('click', () => {
+
+        // Remove the useless question heading
+        let questionHeading = document.getElementsByClassName("questionHeading")[0];
+        if (questionHeading !== undefined) questionHeading.remove();
+
+        // Add some buffer & styling to the box since it's ugly as all hell
+        let trySpyModeText = document.getElementById("tryspymodetext");
+        if (trySpyModeText !== undefined) {
+            trySpyModeText.style.marginTop = "15px";
+            trySpyModeText.style.borderRadius = "15px";
+        }
+
+        // Change the "second" box. The reason we have it in a function is sometimes omegle goes directly to displaying this
+        // and ignore the first set of boxes... Cause they're weird.
+        let changeInconsistent = () => {
+            // Fix link colour for discussing questions
+            let discussingQuestions = $("a").filter(function() {return this.innerHTML === "discussing questions"})[0];
+            discussingQuestions.style.color = settings.constants.linkColourCode;
+
+            // Bind the click to the auto-agreement for TOS  to start the program
+            $(discussingQuestions).on('click', () => startFunction());
+
+            // Bind the click to auto-agreement for TOS  to start the program
+            let askStrangers = $("button").filter(function() {return this.innerHTML === "Ask strangers"})[0];
+            $(askStrangers).on('click', () => startFunction());
+        }
+
+        // Fix the link colour for asking a question
+        let askingAQuestion = $("a").filter(function() {return this.innerHTML === "asking a question"})[0];
+        if (askingAQuestion !== undefined) {
+            askingAQuestion.style.color = settings.constants.linkColourCode;
+
+            // Handle asking a question clicks
+            $(askingAQuestion).on('click', () => {
+                changeInconsistent();
+
+            })
+        } else {
+            changeInconsistent();
+        }
+
+        // Bind click for auto-agreement for TOS to start the program
+        let checkItOut = $("button").filter(function() {return this.innerHTML === "Check it out!"})[0];
+        if (checkItOut !== undefined) $(checkItOut).on('click', () => startFunction());
+
+    })
 
     // Add the buttons
     let buttonContainer = document.createElement("div");
@@ -100,12 +235,17 @@ $(document).on('ready', function () {
     $("canvas").replaceWith(homeButton); // Replace the home button
     $("img[src$='/static/standwithhk.jpeg']").replaceWith(discordButton); // Replace HK banner with Discord
     $("#mobilesitenote").html(
-        "<p>Thanks for using Chromegle! Want to <a href=\"https://www.buymeacoffee.com/isaackogan\">support open source?</a> Consider donating to my college fund!</p>"
-    );
+        "Thanks for using Chromegle! Want to <a href=\"https://www.buymeacoffee.com/isaackogan\">support open source?</a> Consider donating to my college fund!"
+    )
     $("#sharebuttons").css("display", "none");
+    $("a").css("color", settings.constants.linkColourCode);
 
     /**
      * Get the current iteration of the logbox and start observing
+     *
+     * We also threw some stuff that needed to be persistently changed
+     * in here since this class is caused on both start & reconnect.
+     *
      */
     const startObserving = () => {
 
@@ -116,6 +256,30 @@ $(document).on('ready', function () {
         setTimeout(() => observer.observe(
             document.getElementsByClassName("logbox")[0], {attributes: true, subtree: true, childList: true}), 0
         );
+
+        // Replace "what happens if I click" item in unmoderated chat (and remove old instances)
+        let whatHappensIfIClick = document.getElementById("abovevideosexybtn");
+        if (whatHappensIfIClick !== undefined && whatHappensIfIClick !== null) {
+            document.querySelectorAll("#betterWhatHappensIfIClick").forEach((item) => item.remove());
+            let clone = whatHappensIfIClick.cloneNode();
+            clone.innerHTML = `<a href="${settings.constants.discordInviteURL}" target="_blank" 
+                               style="text-decoration: none; color:${settings.constants.linkColourCode}">
+                               <strong>Chromegle Discord (NO NSFW)</strong></a>`
+            clone.style.backgroundColor = darkModeEnabled ? '#292a2d' : "white";
+            clone.style.fontSize = '20px'
+            clone.style.cursor = 'default';
+            clone.id = 'betterWhatHappensIfIClick';
+            if (!darkModeEnabled) clone.style.border = "1px solid #b3b3b3"
+
+            whatHappensIfIClick.replaceWith(clone);
+
+
+        }
+
+        // Replace the video logo omegle watermark
+        let videologo = document.getElementById("videologo");
+        if (videologo !== undefined) videologo.remove();
+
     }
 
     /**
@@ -126,7 +290,20 @@ $(document).on('ready', function () {
         if (darkModeEnabled) {
 
             // Set box colouring & change all text to our grey-white colour
-            ['logwrapper', 'chatmsgwrapper', 'disconnectbtnwrapper', 'disconnectbtn','chatmsg', 'sendbtn', "sendbtnwrapper"].forEach((key) => {
+            [
+                'logwrapper',
+                'chatmsgwrapper',
+                'disconnectbtnwrapper',
+                'disconnectbtn',
+                'chatmsg',
+                'sendbtn',
+                "sendbtnwrapper",
+                "lowergaybtnwrapper",
+                "lowersexybtnwrapper",
+                "lowergaybtn",
+                "lowersexybtn"
+
+            ].forEach((key) => {
                 let element = document.getElementsByClassName(key)[0];
                 if (element === undefined) return;
                 element.style.border = 'none';
@@ -142,8 +319,17 @@ $(document).on('ready', function () {
                 item.style.color = '#d1d1d1'
             }
 
-
         }
+
+        // Change question text to match theme
+        ["questionText", "questionHeading"].forEach((item) => {
+            let element = document.getElementsByClassName(item)[0];
+            if (element === undefined) return;
+
+            element.style.color = '#292a2d'
+
+        })
+
     }
 
     /**
@@ -152,8 +338,42 @@ $(document).on('ready', function () {
     const observer = new MutationObserver(function () {
         // Auto-reconnect
         if ($(".newchatbtnwrapper").is(":visible") && !paused) reconnect();
+
+        // Update chatbox
         darkModeChatBox();
-    })
+
+        // Custom chat advertisement
+        let statusLogs = document.getElementsByClassName("statuslog");
+        if (statusLogs.length > 0 && statusLogs.length < 5) {
+            for (let i = 0; i < statusLogs.length; i++) {
+                let logItem = statusLogs.item(i);
+                if (logItem.innerHTML.includes("You're now chatting with a random stranger.")) {
+                    logItem.innerHTML = "Thanks for using Chromegle! Want to <a href=\"https://www.buymeacoffee.com/isaackogan\">support open source?</a> " +
+                        "Consider donating to my college fund!"
+                    $("a").css("color", settings.constants.linkColourCode);
+                }
+            }
+        }
+
+        // Remove cam advertisement buttons on inappropriate chats
+        [
+            "lowergaybtnwrapper",
+            "lowersexybtnwrapper",
+            "abovevideosexybtn"
+
+        ].forEach((key) => {
+            let element = document.getElementsByClassName(key)[0];
+            if (element === undefined) return;
+
+            element.remove();
+
+        })
+
+        // Automatically ignore the chat-stopping advertisements
+        let camButton = $('span').filter(function() {return this.innerHTML === "No"});
+        if (camButton.get(0) !== undefined) camButton.get(0).parentNode.click();
+
+    });
 
 
     /**
@@ -201,11 +421,10 @@ $(document).on('ready', function () {
         // Observe logbox changes for auto-skip, etc. etc.
         startObserving();
 
-
     }
 
     // Bind the start buttons to the start function
-    ["#textbtn", "#videobtn", "#videobtnunmoderated", "#tryspymodetext.button"].forEach((button) => {
+    ["#textbtn", "#videobtn", "#videobtnunmoderated"].forEach((button) => {
         $(button).on('click', () => startFunction());
     })
 
@@ -340,10 +559,6 @@ $(document).on('ready', function () {
         // Create a new log item container
         let logItemDiv = document.createElement("div");
         logItemDiv.classList.add("logitem");
-
-        // Override the "You are now chatting with a stranger" message
-        let initialLog = logBoxDiv.children[0];
-        initialLog.children[0].innerHTML = "Thanks for using Chromegle! Want to <a href=\"https://www.buymeacoffee.com/isaackogan\">support open source</a>? Consider donating to my college fund!"
 
         // Create a new div to hold the IP grabber stuff & geolocate
         ipGrabberDiv = document.createElement("div");

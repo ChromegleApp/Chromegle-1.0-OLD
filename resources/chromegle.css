@@ -113,3 +113,7 @@ html {
 	width:100%;
 	text-align: center;
 }
+
+.background {
+	background-image: url("");
+}

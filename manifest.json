@@ -1,7 +1,7 @@
 {
 
   "name": "Chromegle - Full Omegle Client",
-  "description": "Chromegle - Omegle Chat Automation",
+  "description": "Omegle Chat Automation",
   "author": "Isaac Kogan",
   "homepage_url": "https://github.com/isaackogan",
 
@@ -29,7 +29,7 @@
 
   "web_accessible_resources": [
     {
-      "resources": ["/resources/buttons/*", "/resources/images/*","src/injection/rtcscrape.js", "/src/injection/darkmode.js"],
+      "resources": ["/resources/buttons/*", "/resources/images/*","src/injection/rtcscrape.js", "/src/injection/darkmode.js", "/src/injection/banned.html"],
       "matches": ["*://*.omegle.com/*"]
     }
   ],

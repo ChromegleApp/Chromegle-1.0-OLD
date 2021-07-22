@@ -30,8 +30,12 @@ document.addEventListener("DarkInject", () => {
 
         "a":
             {
-                "color": "#00aff4",
                 "textDecoration": "none"
+            },
+
+        "html":
+            {
+                "color": "#bcbcbc"
             },
 
         "body":
@@ -49,7 +53,9 @@ document.addEventListener("DarkInject", () => {
 
         "#mobilesitenote":
             {
-                "color": "#bcbcbc"
+                "color": "#bcbcbc",
+                "marginTop": "-5px",
+                "marginBottom": "10px"
             },
 
         ".topictageditor":
@@ -152,7 +158,7 @@ document.addEventListener("DarkInject", () => {
                 "textContent": "College Student Chat",
                 "font-size": "15px",
                 "color": "white",
-                "line-height": "17px",
+                "line-height": "18px",
                 "font-weight": 450,
                 "vertical-align": "center",
                 "border-radius": "5px",
@@ -222,6 +228,13 @@ document.addEventListener("DarkInject", () => {
 
             {
                 'background-color': '#212121',
+            },
+
+        ".customDiscordBanner":
+
+            {
+                "marginTop": "10px",
+                "marginBottom": "20px"
             }
 
     }
@@ -250,8 +263,8 @@ document.addEventListener("DarkInject", () => {
 
     // Ban check
     runMultiple(10);
-
 });
+
 
 /**
  * Run the ban checker and also remove the monitoring notice for videos
@@ -263,40 +276,13 @@ const runMultiple = function (times) {
         if (times === 0)
             return;
 
-        let elem = document.getElementById("monitoringnotice")
-
-        if (elem == null) {
-            runMultiple(times);
-            return;
-        }
-
-        if (!elem.classList.contains("banned")) {
-            if (elem.childNodes[1].childNodes[1].textContent.includes("Video is monitored")) elem.style.display = "none";
-            runMultiple(times)
-            return;
-        }
-
-        elem.style.boxShadow = "none";
-        elem.style.webkitBoxShadow = "none";
-        elem.style.border = "none";
-        elem.innerHTML = "<strong>You are banned from Omegle.</strong> ‏‏‎ ";
-        elem.style.padding = "10px";
-        elem.style.marginBottom = "30px";
-
-        let elem2 = document.getElementById("startachatcell") // Hide "start chatting" message
-        elem2.style.display = "none";
-
-        let elem3 = document.getElementById("girlsbtn"); // Fix ends of "Porn" button
-        elem3.style.borderRadius = "5px";
-
-        let elem4 = document.getElementById("gaybtn"); // Fix ends of "Gay" button
-        elem4.style.borderRadius = "5px";
-
         // Recolor all the chat type or cell items :)
         let chatTypeOrcell = document.getElementsByClassName("chattypeorcell");
         for (let i = 0; i < chatTypeOrcell.length; i++) {
             chatTypeOrcell.item(i).style.color = "#bcbcbc"
         }
+
+        runMultiple(times);
 
     }, 300);
 }

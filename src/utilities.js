@@ -33,6 +33,7 @@ const settings = {
         discordInviteURL: "https://discord.gg/kaX9H65VhG",
         baseButtonContainerMargin: 80,
         geolocationEndpoint: "https://freegeoip.app/json/",
+        linkColourCode: "#00a5e6", //"#00aff4",
 
         geolocationJSONMappings: {
             country_name: "Country",
