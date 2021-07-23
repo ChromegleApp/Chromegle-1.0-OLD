@@ -1,10 +1,8 @@
 Chromegle
 ==================
-A Javascript Chrome Extension for Omegle, certified for Chrome 88 and above.
+A Javascript Chrome Extension for Omegle, certified for Chrome 88 and above. Join the support discord and DM ``fallen#9745`` for inquiries, help and suggestions.
 
- [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white&style=flat-square)](https://www.linkedin.com/in/isaac-kogan-5a45b9193/ ) ![Issues](https://img.shields.io/github/issues/isaackogan/Chromegle) ![Forks](https://img.shields.io/github/forks/isaackogan/Chromegle) ![Stars](https://img.shields.io/github/stars/isaackogan/Chromegle) [![Support Server](https://img.shields.io/discord/655522419460669481.svg?color=7289da&logo=discord&style=flat-square)](https://discord.gg/kaX9H65VhG)
-
-Join the support discord and DM ``fallen#9745`` for inquiries, help and suggestions.
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white&style=flat-square)](https://www.linkedin.com/in/isaac-kogan-5a45b9193/ ) ![Issues](https://img.shields.io/github/issues/isaackogan/Chromegle) ![Forks](https://img.shields.io/github/forks/isaackogan/Chromegle) ![Stars](https://img.shields.io/github/stars/isaackogan/Chromegle) [![Support Server](https://img.shields.io/discord/655522419460669481.svg?color=7289da&logo=discord&style=flat-square)](https://discord.gg/kaX9H65VhG)
 
 ## Disclaimer
 
