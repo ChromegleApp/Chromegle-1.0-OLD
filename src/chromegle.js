@@ -40,6 +40,8 @@ $(document).on('ready', function () {
         // Update chatbox
         darkModeChatBox();
 
+        $("a").css("color", settings.constants.linkColourCode);
+
         // Custom chat advertisement
         let statusLogs = document.getElementsByClassName("statuslog");
         if (statusLogs.length > 0 && statusLogs.length < 5) {
@@ -49,7 +51,6 @@ $(document).on('ready', function () {
                 if (logItem.innerHTML.includes("You're now chatting with a random stranger.")) {
                     logItem.innerHTML = "Thanks for using Chromegle! Want to <a href=\"https://www.buymeacoffee.com/isaackogan\">support open source?</a> " +
                         "Consider donating to my college fund!"
-                    $("a").css("color", settings.constants.linkColourCode);
 
                 }
             }
@@ -98,7 +99,6 @@ $(document).on('ready', function () {
 
         // Start observing for updates
         observer.observe(document.getElementsByClassName("logbox")[0], {attributes: true, subtree: true, childList: true});
-        $("a").css("color", settings.constants.linkColourCode);
 
         // Replace "what happens if I click" item in unmoderated chat (and remove old instances)
         let whatHappensIfIClick = document.getElementById("abovevideosexybtn");
