@@ -1,7 +1,6 @@
 /** Get the filter text */
 const filterLevels = ["Level0.txt", "Level1.txt", "Level2.txt"]
 
-
 for (let i = 0; i < filterLevels.length; i++) {
     fetch(`chrome-extension://${appID}/resources/filter/${filterLevels[i]}`)
         .then(response => response.text()).then(response => response.replaceAll("\r", ""))

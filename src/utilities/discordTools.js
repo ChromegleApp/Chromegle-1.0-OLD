@@ -13,7 +13,6 @@ let runFetch = () => {
         .then(response => {
             let rawDiscordOC = response["presence_count"];
             let discordOCText = numberWithCommas((Math.floor(rawDiscordOC / 100) * 100));
-            let newOmegleOnlineDiv = document.createElement("div");
 
             newOmegleOnlineDiv.classList.add('discordWidget');
 

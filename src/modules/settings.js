@@ -4,63 +4,10 @@ settingsModal.style.display = 'none';
 $(settingsModal).load(`chrome-extension://${appID}/src/injection/settings.html`)
 $("html").append(settingsModal);
 
-
-const toggleSettingsModal = () => {
-    if (settingsModal.style.display === "none") settingsModal.style.display = "block";
-    else settingsModal.style.display = "none";
-
-    // Toggle intro box if there
-    let introBox = document.getElementById("intro");
-    if (introBox !== null) {
-
-        if (introBox.style.display === 'none') introBox.style.display = 'block';
-        else introBox.style.display = 'none';
-
-    }
-
-}
-
-const toggleSwitch = (element, storageField) => {
-    element.classList.toggle('editToggleEnabled');
-    let toggleChange = {}
-
-    // Enable it
-    if (element.innerHTML === "Enable")
-    {
-        element.innerHTML = "Disable"
-        toggleChange[storageField] = true;
-    }
-
-    // Disable it
-    else
-    {
-        element.innerHTML = "Enable"
-        toggleChange[storageField] = false;
-    }
-
-    chrome.storage.sync.set(toggleChange);
-
-
-}
-
-const toggleInitial = (element, storageField, storageFieldDefault) => {
-    let toggleCheck = {}
-    toggleCheck[storageField] = storageFieldDefault
-
-    chrome.storage.sync.get(toggleCheck, (result) => {
-
-        if (result[storageField]) {
-            element.classList.toggle('editToggleEnabled');
-            element.innerHTML = "Disable"
-        }
-
-    })
-}
-
 /**
  * Settings Modal
  */
-$(document).on('ready', () => {setTimeout(() => {
+$(document).on('ChromegleInit', () => {setTimeout(() => {
 
     // Add functionality to the close button in the modal
     $("#closeModal").on('click', () => toggleSettingsModal())
@@ -315,3 +262,55 @@ $(document).on('ready', () => {setTimeout(() => {
 
 }, 500)});
 
+
+const toggleSettingsModal = () => {
+    if (settingsModal.style.display === "none") settingsModal.style.display = "block";
+    else settingsModal.style.display = "none";
+
+    // Toggle intro box if there
+    let introBox = document.getElementById("intro");
+    if (introBox !== null) {
+
+        if (introBox.style.display === 'none') introBox.style.display = 'block';
+        else introBox.style.display = 'none';
+
+    }
+
+}
+
+const toggleSwitch = (element, storageField) => {
+    element.classList.toggle('editToggleEnabled');
+    let toggleChange = {}
+
+    // Enable it
+    if (element.innerHTML === "Enable")
+    {
+        element.innerHTML = "Disable"
+        toggleChange[storageField] = true;
+    }
+
+    // Disable it
+    else
+    {
+        element.innerHTML = "Enable"
+        toggleChange[storageField] = false;
+    }
+
+    chrome.storage.sync.set(toggleChange);
+
+
+}
+
+const toggleInitial = (element, storageField, storageFieldDefault) => {
+    let toggleCheck = {}
+    toggleCheck[storageField] = storageFieldDefault
+
+    chrome.storage.sync.get(toggleCheck, (result) => {
+
+        if (result[storageField]) {
+            element.classList.toggle('editToggleEnabled');
+            element.innerHTML = "Disable"
+        }
+
+    })
+}

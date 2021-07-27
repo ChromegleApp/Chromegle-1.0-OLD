@@ -32,27 +32,6 @@ const discordButton = $("<button class='customDiscordBanner'></button>")
     .on('click', function () {window.open(settings.constants.discordInviteURL);});
 
 
-
-/*
-Prevent element showing after certian point
-
-$(window).on('resize', function() {
-    if ($(this).width() < 1024) {
-
-        $(discordWidget).hide();
-
-    } else {
-
-        $(discordWidget).show();
-
-    }
-
-});
- */
-
-
-
-
 // Show the IP (video chat button)
 const ipToggleButton = $("<button style='margin-bottom: 8px'></button>")
     // Bind the click action to a new function

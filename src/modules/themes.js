@@ -1,6 +1,6 @@
 let darkModeEnabled;
 
-$(document).on('ready', function () {
+$(document).on('ChromegleInit', function () {
 
     chrome.storage.sync.get({darkModeEnabled: settings.defaultsNew.darkModeEnabled}, (result) => {
 
@@ -41,3 +41,53 @@ $(document).on('ready', function () {
 
 });
 
+
+/**
+ * Update the chat-box to dark mode
+ */
+const darkModeChatBox = () => {
+
+    if (darkModeEnabled) {
+
+        // Set box colouring & change all text to our grey-white colour
+        [
+            'logwrapper',
+            'chatmsgwrapper',
+            'disconnectbtnwrapper',
+            'disconnectbtn',
+            'chatmsg',
+            'sendbtn',
+            "sendbtnwrapper",
+            "lowergaybtnwrapper",
+            "lowersexybtnwrapper",
+            "lowergaybtn",
+            "lowersexybtn"
+
+        ].forEach((key) => {
+            let element = document.getElementsByClassName(key)[0];
+            if (element === undefined) return;
+            element.style.border = 'none';
+            element.style.color = '#d1d1d1';
+            element.style.background = '#292a2d'
+        })
+
+        // Status log messages
+        let logMessages = document.getElementsByClassName("statuslog");
+        for (let i = 0; i < logMessages.length ; i++) {
+            let item = logMessages.item(i);
+            if (item == null) continue;
+            item.style.color = '#d1d1d1'
+        }
+
+    }
+
+    // Change question text to match theme
+    ["questionText", "questionHeading"].forEach((item) => {
+        let element = document.getElementsByClassName(item)[0];
+        if (element === undefined) return;
+
+        element.style.color = '#292a2d'
+
+    })
+
+}

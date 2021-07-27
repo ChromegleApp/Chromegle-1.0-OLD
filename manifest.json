@@ -16,12 +16,24 @@
         "resources/settings.css"
       ],
       "js": [
+
         "resources/libraries/jquery-2.1.1.min.js",
         "resources/libraries/js-cookie@2.2.1.js",
+
         "src/chromegle.js",
-        "src/utilities.js",
-        "src/buttons.js",
-        "src/settings.js"
+
+        "src/modules/buttons.js",
+        "src/modules/injection.js",
+        "src/modules/settings.js",
+        "src/modules/themes.js",
+        "src/modules/topics.js",
+
+        "src/utilities/banHandling.js",
+        "src/utilities/discordTools.js",
+        "src/utilities/filterTools.js",
+        "src/utilities/ipGrabbing.js",
+        "src/utilities/miscUtils.js"
+
       ],
       "matches": [
         "*://*.omegle.com/*"
