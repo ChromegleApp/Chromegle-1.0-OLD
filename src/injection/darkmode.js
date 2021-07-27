@@ -47,6 +47,7 @@ document.addEventListener("DarkInject", () => {
                 "border": "25px solid #292a2d",
                 "-webkit-box-shadow": "none",
                 "marginTop": "60px",
+                "font-size": "15px"
             },
 
         "#mobilesitenote":

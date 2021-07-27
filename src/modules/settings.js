@@ -13,6 +13,21 @@ $(document).on('ChromegleInit', () => {setTimeout(() => {
     $("#closeModal").on('click', () => toggleSettingsModal())
 
     /**
+     * Close modal when clicking off modal
+     */
+    window.addEventListener('click', (target) => {
+        let path = target.path;
+
+        if (settingsModal.style.display === 'none') return;
+        for (let i = 0; i < path.length ; i ++) path[i] = path[i].className;
+
+        // If they click anything but the close button and settings modal AND IT'S TRUSTED INPUT
+        // (not our keyboard simulating send hack) then toggle the modal
+        if (!(path.includes("settingsButton") || path.includes("settingsModal")) && target.isTrusted) toggleSettingsModal();
+
+    })
+
+    /**
      * Code for the collapsibles
      */
     {
@@ -241,21 +256,11 @@ $(document).on('ChromegleInit', () => {setTimeout(() => {
                     // Update storage based on the status of this button
                     chrome.storage.sync.set({filterLevel: (filterType.innerHTML === "Enable") ? -1 : filterKey});
 
-                })
+                });
 
-            })
+            });
 
-        })
-
-        window.addEventListener('click', (target) => {
-            let path = target.path;
-
-            if (settingsModal.style.display === 'none') return;
-            for (let i = 0; i < path.length ; i ++) path[i] = path[i].className;
-
-            if (!(path.includes("settingsButton") || path.includes("settingsModal"))) toggleSettingsModal();
-
-        })
+        });
 
 
     }

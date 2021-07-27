@@ -16,17 +16,10 @@ $(document).on('ChromegleInit', function () {
     $("#sharebuttons").css("display", "none");
     $("a").css("color", settings.constants.linkColourCode);
 
+    // Hide count if window is too small (prevent going over buttons)
     $(window).on('resize', function() {
-        if ($(this).width() < 1024) {
-
-            $(ononline).hide();
-
-        } else {
-
-            $(discordWidget).show();
-
-        }
-
+        if ($(this).width() < 900) {$(newOmegleOnlineDiv).hide();
+        } else {$(newOmegleOnlineDiv).show();}
     });
 
 });
