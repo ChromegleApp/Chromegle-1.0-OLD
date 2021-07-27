@@ -1,5 +1,3 @@
-// noinspection SpellCheckingInspection
-
 /**
  *
  * Dark Mode Injection
@@ -55,7 +53,7 @@ document.addEventListener("DarkInject", () => {
             {
                 "color": "#bcbcbc",
                 "marginTop": "-5px",
-                "marginBottom": "10px"
+                "marginBottom": "10px",
             },
 
         ".topictageditor":
@@ -126,11 +124,6 @@ document.addEventListener("DarkInject", () => {
         ".chattypeorcell":
             {
                 "color": "#bcbcbc"
-            },
-
-        "#footer":
-            {
-                "display": "none"
             },
 
         "#header":
@@ -224,12 +217,6 @@ document.addEventListener("DarkInject", () => {
                 "color": "#bcbcbc"
             },
 
-        ".itemBar":
-
-            {
-                'background-color': '#212121',
-            },
-
         ".customDiscordBanner":
 
             {
@@ -261,15 +248,16 @@ document.addEventListener("DarkInject", () => {
 
     });
 
-    // Ban check
-    runMultiple(10);
+    // Non-static check (stuff that requires an API request)
+    runMultiple(20);
+
 });
 
 
 /**
  * Run the ban checker and also remove the monitoring notice for videos
  */
-const runMultiple = function (times) {
+const runMultiple = function (times, didWidget) {
     setTimeout(() => {
         times -= 1;
 
@@ -282,7 +270,7 @@ const runMultiple = function (times) {
             chatTypeOrcell.item(i).style.color = "#bcbcbc"
         }
 
-        runMultiple(times);
+        runMultiple(times, didWidget);
 
     }, 300);
 }

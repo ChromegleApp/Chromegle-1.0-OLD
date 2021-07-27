@@ -7,19 +7,21 @@
 
   "manifest_version": 3,
   "version": "1.0.0",
-  "icons": {"16": "resources/favicon.png", "48": "resources/favicon.png", "128": "resources/favicon.png"},
+  "icons": {"16": "resources/images/extensionLogo.png", "48": "resources/images/extensionLogo.png", "128": "resources/images/extensionLogo.png"},
 
   "content_scripts": [
     {
       "css": [
-        "resources/chromegle.css"
+        "resources/chromegle.css",
+        "resources/settings.css"
       ],
       "js": [
-        "resources/jquery-2.1.1.min.js",
-        "resources/js-cookie@2.2.1.js",
+        "resources/libraries/jquery-2.1.1.min.js",
+        "resources/libraries/js-cookie@2.2.1.js",
         "src/chromegle.js",
         "src/utilities.js",
-        "src/buttons.js"
+        "src/buttons.js",
+        "src/settings.js"
       ],
       "matches": [
         "*://*.omegle.com/*"
@@ -29,7 +31,11 @@
 
   "web_accessible_resources": [
     {
-      "resources": ["/resources/buttons/*", "/resources/images/*","src/injection/rtcscrape.js", "/src/injection/darkmode.js", "/src/injection/banned.html"],
+      "resources": [
+        "/resources/images/*",
+        "/resources/filter/*",
+        "src/*"
+      ],
       "matches": ["*://*.omegle.com/*"]
     }
   ],

@@ -13,7 +13,6 @@ html {
 
 	background-size: 144px 54px;
 	height: 54px; width: 144px;
-
 }
 
 #betterLogo {
@@ -23,18 +22,15 @@ html {
 	margin: 0 5em 0 .5em;
 }
 
-
-
 .itemBar {
 	position: absolute;
 	width: 680px;
 	height: inherit;
 	z-index: 2;
-	background-color: white;
 }
 
 .customDiscordBanner {
-	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/discordBanner.png");
+	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/images/discordBanner.png");
 	height: 150px; width: 287px;
 	background-size: 287px 150px;
 	background-color: inherit;
@@ -43,6 +39,16 @@ html {
 	z-index: 2;
 	margin-right: 20px;
 	margin-bottom: 25px;
+}
+
+.discordWidget {
+	font-size: 1.5em;
+	color: #9cf;
+	position: absolute;
+	top: 0;
+	right: .333333em;
+	bottom: 6px;
+	z-index: 12;
 }
 
 .statusItem {
@@ -60,28 +66,12 @@ html {
 	font-weight: normal;
 }
 
-.pauseButton {
-	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/pauseButton.png")
-}
-
-.unpauseButton {
-	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/resumeButton.png")
-}
-
-.darkModeButton {
-	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/darkModeButton.png")
-}
-
-.lightModeButton {
-	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/lightModeButton.png")
+.settingsButton {
+	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/images/settingsButton.png")
 }
 
 .greetingButton {
-	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/greetingButton.png")
-}
-
-.autoSkipButton {
-	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/autoSkipButton.png")
+	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/images/greetingButton.png")
 }
 
 .homeButton {
@@ -89,7 +79,7 @@ html {
 	background-size: 236px 57px;
 	border: none;
 	background-color: inherit;
-	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/buttons/homeButton.png")
+	background-image: url("chrome-extension://__MSG_@@extension_id__/resources/images/homeButton.png")
 }
 
 .ipLookupButton {
@@ -102,18 +92,4 @@ html {
 	padding-left: inherit;
 	background-size: inherit;
 	height: inherit; width: inherit;
-}
-
-.loading {
-	font-size: 60px;
-	color: #bcbcbc;
-	position:fixed;
-	z-index: 100;
-	top: 38%;
-	width:100%;
-	text-align: center;
-}
-
-.background {
-	background-image: url("");
 }

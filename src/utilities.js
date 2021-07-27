@@ -26,11 +26,34 @@ const settings = {
 
     },
 
+    promptsNew: {
+        autoSkip: "Enter an interval (seconds) after connecting to skip:",
+        typingSpeed: "Enter a new speed (wpm) for keyboard typing:",
+        sendingDelay: "Enter a new delay (seconds) before sending messages:"
+    },
+
+     defaultsNew: {
+
+        geoLocateEnabled: true,
+        filterLevel: 0,
+        text: "Hello there!",
+        darkModeEnabled: false,
+        ipGrabEnabled: true,
+        autoReconnectEnabled: true,
+        autoSkipEnabled: false,
+        greetingEnabled: false,
+        typingSpeed: 42,
+        sendingDelay: 0,
+        autoSkip: 5
+
+    },
+
     // Constant values that do not change
     constants: {
 
         lettersPerWord: 8,
-        discordInviteURL: "https://discord.gg/kaX9H65VhG",
+        discordInviteURL: "https://discord.gg/TRCNZ5vuwM",
+        discordGuildID: "798632874776985660",
         baseButtonContainerMargin: 80,
         geolocationEndpoint: "https://freegeoip.app/json/",
         linkColourCode: "#00a5e6", //"#00aff4",
@@ -89,4 +112,14 @@ const createLogBoxMessage = (label, value) => {
 
 }
 
+String.prototype.replaceAll = function(strReplace, strWith) {
+    // See http://stackoverflow.com/a/3561711/556609
+    var esc = strReplace.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    var reg = new RegExp(esc, 'ig');
+    return this.replace(reg, strWith);
+};
 
+
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}

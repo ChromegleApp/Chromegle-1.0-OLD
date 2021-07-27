@@ -8,22 +8,6 @@
  * @credits UUID Generation: https://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid
  * @credits Numerical Check: https://stackoverflow.com/questions/175739/built-in-way-in-javascript-to-check-if-a-string-is-a-valid-number
  *
- * Description:
- *
- * Ever wanted to automate your Omegle? This library overwrites the Omegle client to add additional functionality such as:
- *      Automated messaging
- *      Human-Simulated Typing to prevent bans
- *      Automated messaging delay configuration
- *      Automated messaging typing speed configuration
- *      Bypass the TOS confirmation
- *      Scrape IP-Addresses from WebRTC
- *      Ip-Lookup from IP-Addresses
- *      Enable/Disable IP-Lookup (In-case you don't want to see it, or need to for streaming or something...)
- *      Auto-Skip Connections
- *      Custom button & alert system interface UI
- *      Automatically connect to the next chat (for text chat- video already can)
- *      Save topics in extension data, set on page-leave and chat-start and synced on page load, EVEN if your cookies are reset!
- *      Custom Dark-Theme with less Omegle stuff and a cleaner look
  */
 
 /** Whether or not the client is paused */
@@ -35,54 +19,16 @@ let ipGrabberDiv;
 /** Get the app ID for loading file resources dynamically in javascript */
 let appID = chrome.runtime.id;
 
-/**
- * Update page cookies with cache on start
- */
-chrome.storage.sync.get(["topicList"],
-    (val) => {
-        let cachedTopicString = JSON.stringify(val.topicList);
-        let cookieTopicString = Cookies.get("topiclist", {domain: ".omegle.com"});
-
-        console.log(`[DEBUG] Cached Topics: ${cachedTopicString} Cookie Topics: ${cookieTopicString}`);
-
-        // If there's a de-sync, fix & re-sync cookies... but ONLY if *our* cache isn't null, a.k.a they stored cookies with us
-        if (cachedTopicString !== cookieTopicString && val.topicList !== null && val.topicList !== undefined) {
-            Cookies.set("topiclist", cachedTopicString, {domain: ".omegle.com"});
-            window.location.reload(true);
-        }
-    }
-);
-
-/** Store their topics when they try to leave the page (for syncing) */
-window.addEventListener("beforeunload", function() {
-    let cookieTopicString = Cookies.get("topiclist", {domain: ".omegle.com"});
-    chrome.storage.sync.set({"topicList": JSON.parse(cookieTopicString)});
-}, false);
-
+/** Current check index for filter (current log # in order)*/
+let checkIndex = 0
 
 /** Chromegle Manipulates the Omegle window via jQuery to run actions */
 $(document).on('ready', function () {
-
-    // Make visible after 400ms to allow for loading of elements
     setTimeout(() => document.getElementsByTagName("html")[0].style.visibility = "visible", 700);
 
-    /** Preflight -> Porn-redirect screen */
-    if (window.location.href.includes("banredir.html")) {
-        window.location.href = "https://omegle.com/static/ban.html";
-        return;
-    }
-
-    /** Preflight -> Static HTML ban screen */
-    if (window.location.href.includes("ban.html")) {
-        $("html").load(`chrome-extension://${appID}/src/injection/banned.html`)
-        let item = document.getElementsByTagName("html")[0]
-        item.style.visibility = "visible"
-        item.style.backgroundColor = '#20242c';
-        return;
-    }
-
-    // Startup
-    let sessionID = uuid4();
+    if (isBanned()) return; // Cancel if banned
+    let sessionID = uuid4(); // Generate initial session
+    fixMonitoringMessages(20); // Override monitoring message
 
     // Create IP-Grabber
     let script = document.createElement('script');
@@ -90,97 +36,14 @@ $(document).on('ready', function () {
     script.onload = () => {script.remove(); document.dispatchEvent(new CustomEvent('IPScrape'))};
     (document.head || document.documentElement).appendChild(script);
 
-    // Dark-Mode Initializer
-    let darkModeEnabled;
-    chrome.storage.sync.get({darkMode: settings.defaults.darkModeNotFound}, (result) => {
-
-        // Configure Light/Dark Mode Button
-        if (!result.darkMode) {darkModeEnabled = false; darkModeButton.addClass("darkModeButton"); return;}
-        darkModeButton.addClass("lightModeButton"); darkModeEnabled = true;
-
-        // We like a darker loading screen
-        $("html").css("background-color", "#212121")
-
-        // Inject Dark-Mode Script
-        let darkScript = document.createElement('script');
-        darkScript.src = chrome.runtime.getURL('/src/injection/darkmode.js')
-        darkScript.onload = () => {darkScript.remove(); document.dispatchEvent(new CustomEvent('DarkInject'))};
-        (document.head || document.documentElement).appendChild(darkScript);
-
-        // Add handling for spymode button >> IN DARK MODE <<
-        $("#spymodebtn").on('click', () => {
-            let trySpyModeText = document.getElementById("tryspymodetext");
-            trySpyModeText.style.backgroundColor = "#212121";
-            setTimeout(() => trySpyModeText.style.marginTop = "40px", 10)
-        });
-
-    });
-
-    // Change Monitoring message & banned to custom styling
-    const fixMonitoringMessages = function (times) {
-        setTimeout(() => {
-            times -= 1;
-
-            if (times === 0)
-                return;
-
-            let elem = document.getElementById("monitoringnotice")
-
-            if (elem == null) {
-                fixMonitoringMessages(times);
-                return;
-            }
-
-            if (!elem.classList.contains("banned")) {
-                if (elem.childNodes[1].childNodes[1].textContent.includes("Video is monitored")) elem.style.display = "none";
-                fixMonitoringMessages(times)
-                return;
-            }
-
-            elem.style.boxShadow = "none";
-            elem.style.webkitBoxShadow = "none";
-            elem.style.border = "none";
-            elem.style.cursor = "pointer";
-            elem.innerHTML = "<strong>You are banned from Omegle... Click for Why</strong> ‏‏‎ ";
-            elem.style.color = "black";
-            elem.style.padding = "10px";
-            elem.style.marginBottom = "30px";
-
-            // Bind click to redirect
-            $(elem).on('click', () => window.location.href = 'https://omegle.com/static/ban.html');
-
-            let elem2 = document.getElementById("startachatcell") // Hide "start chatting" message
-            if (darkModeEnabled) {
-                elem2.style.display = "none";
-            } else {
-                elem2.innerHTML = "<span>Unmonitored Chats:</span><br>‏‏‎"
-                elem2.style.marginBottom = "10px";
-            }
-
-            let elem3 = document.getElementById("girlsbtn"); // Fix ends of "Porn" button
-            elem3.style.borderRadius = "5px";
-
-            let elem4 = document.getElementById("gaybtn"); // Fix ends of "Gay" button
-            elem4.style.borderRadius = "5px";
-
-            // Recolor all the chat type or cell items :)
-            let chatTypeOrcell = document.getElementsByClassName("chattypeorcell");
-            for (let i = 0; i < chatTypeOrcell.length; i++) {
-                chatTypeOrcell.item(i).style.color = "#bcbcbc"
-            }
-
-        }, 300);
-    }
-    fixMonitoringMessages(20);
-
     /**
-     * Custom handling for spy mode buttons to bypass captchas & fix link colouring etc.
+     * Custom handling for spy mode images to bypass captchas & fix link colouring etc.
      */
     $("#spymodebtn").on('click', () => {
 
         // Remove the useless question heading
         let questionHeading = document.getElementsByClassName("questionHeading")[0];
-        if (questionHeading !== undefined) questionHeading.remove();
+        if (questionHeading !== undefined && questionHeading) questionHeading.remove();
 
         // Add some buffer & styling to the box since it's ugly as all hell
         let trySpyModeText = document.getElementById("tryspymodetext");
@@ -224,11 +87,11 @@ $(document).on('ready', function () {
 
     })
 
-    // Add the buttons
+    // Add the images
     let buttonContainer = document.createElement("div");
     buttonContainer.classList.add("itemBar"); // Add class
     buttonContainer.style.marginLeft = 240 + settings.constants.baseButtonContainerMargin + "px"; // Set position
-    [pauseButton, greetingButton, autoSkipButton, darkModeButton].forEach((element) => buttonContainer.appendChild(element.get(0)));
+    [greetingButton, settingsButton].forEach((element) => buttonContainer.appendChild(element.get(0)));
 
     // Static item replacement
     $("#tagline").html('').append(buttonContainer);  // Add the button container
@@ -236,7 +99,8 @@ $(document).on('ready', function () {
     $("img[src$='/static/standwithhk.jpeg']").replaceWith(discordButton); // Replace HK banner with Discord
     $("#mobilesitenote").html(
         "Thanks for using Chromegle! Want to <a href=\"https://www.buymeacoffee.com/isaackogan\">support open source?</a> Consider donating to my college fund!"
-    )
+    ).css("overflow", "hidden").css("width", "100%")
+    $("#footer").css("display", "none")
     $("#sharebuttons").css("display", "none");
     $("a").css("color", settings.constants.linkColourCode);
 
@@ -249,13 +113,14 @@ $(document).on('ready', function () {
      */
     const startObserving = () => {
 
+        console.log('STARTOB')
+
         // Initialize the chat box since we won't have done that yet
         darkModeChatBox();
 
-        // Begin observing
-        setTimeout(() => observer.observe(
-            document.getElementsByClassName("logbox")[0], {attributes: true, subtree: true, childList: true}), 0
-        );
+        // Start observing for updates
+        observer.observe(document.getElementsByClassName("logbox")[0], {attributes: true, subtree: true, childList: true});
+        $("a").css("color", settings.constants.linkColourCode);
 
         // Replace "what happens if I click" item in unmoderated chat (and remove old instances)
         let whatHappensIfIClick = document.getElementById("abovevideosexybtn");
@@ -278,7 +143,7 @@ $(document).on('ready', function () {
 
         // Replace the video logo omegle watermark
         let videologo = document.getElementById("videologo");
-        if (videologo !== undefined) videologo.remove();
+        if (videologo !== null) videologo.remove();
 
     }
 
@@ -337,7 +202,7 @@ $(document).on('ready', function () {
      */
     const observer = new MutationObserver(function () {
         // Auto-reconnect
-        if ($(".newchatbtnwrapper").is(":visible") && !paused) reconnect();
+        if ($(".newchatbtnwrapper").is(":visible")) reconnect();
 
         // Update chatbox
         darkModeChatBox();
@@ -347,15 +212,17 @@ $(document).on('ready', function () {
         if (statusLogs.length > 0 && statusLogs.length < 5) {
             for (let i = 0; i < statusLogs.length; i++) {
                 let logItem = statusLogs.item(i);
+
                 if (logItem.innerHTML.includes("You're now chatting with a random stranger.")) {
                     logItem.innerHTML = "Thanks for using Chromegle! Want to <a href=\"https://www.buymeacoffee.com/isaackogan\">support open source?</a> " +
                         "Consider donating to my college fund!"
                     $("a").css("color", settings.constants.linkColourCode);
+
                 }
             }
         }
 
-        // Remove cam advertisement buttons on inappropriate chats
+        // Remove cam advertisement images on inappropriate chats
         [
             "lowergaybtnwrapper",
             "lowersexybtnwrapper",
@@ -364,7 +231,6 @@ $(document).on('ready', function () {
         ].forEach((key) => {
             let element = document.getElementsByClassName(key)[0];
             if (element === undefined) return;
-
             element.remove();
 
         })
@@ -373,8 +239,40 @@ $(document).on('ready', function () {
         let camButton = $('span').filter(function() {return this.innerHTML === "No"});
         if (camButton.get(0) !== undefined) camButton.get(0).parentNode.click();
 
+        // Filter
+        let logBox = document.getElementsByClassName("logbox")[0];
+        let logElements = logBox.getElementsByTagName("span");
+
+        chrome.storage.sync.get({filterLevel: settings.defaultsNew.filterLevel}, (result) => {
+            for (let i = JSON.parse(JSON.stringify(checkIndex)); i < logElements.length; i++) {
+                logElements[i].textContent = filterString(logElements[i].textContent, result.filterLevel);
+                checkIndex ++;
+            }
+        })
     });
 
+
+    const chatStartFunctions = () => {
+
+        // Send if enabled
+        chrome.storage.sync.get(
+            {
+                text: settings.defaultsNew.text,
+                autoSkip: settings.defaultsNew.autoSkip,
+                sendingDelay: settings.defaultsNew.sendingDelay,
+                typingSpeed: settings.defaultsNew.typingSpeed,
+                greetingEnabled: settings.defaultsNew.greetingEnabled,
+                autoSkipEnabled: settings.defaultsNew.autoSkipEnabled
+            },
+            (val) => {
+
+                if (val.greetingEnabled) write(val.text, val.sendingDelay, val.typingSpeed);
+                if (val.autoSkipEnabled) skipFunction(val.autoSkip);
+
+            }
+        );
+
+    }
 
     /**
      * Initialize Omegle Chat, Log topic cookies & Bypass Confirmation
@@ -387,21 +285,7 @@ $(document).on('ready', function () {
         // Confirm join
         $("input[type=button][value='Confirm & continue']").trigger("click");
 
-        // Send if enabled
-        chrome.storage.sync.get(
-            {
-                text: settings.defaults.greetingMessageNotFound,
-                delay: settings.defaults.greetingDelayNotFound,
-                wpm: settings.defaults.wpmNotFound,
-                skipTime: settings.defaults.skipTimeNotFound,
-            },
-            (val) => {
-
-                write(val.text, val.delay, val.wpm);
-                skipFunction(val.skipTime);
-
-            }
-        );
+        chatStartFunctions();
 
         // Update the stored cookies
         let cookies = Cookies.get("topiclist");
@@ -423,7 +307,7 @@ $(document).on('ready', function () {
 
     }
 
-    // Bind the start buttons to the start function
+    // Bind the start images to the start function
     ["#textbtn", "#videobtn", "#videobtnunmoderated"].forEach((button) => {
         $(button).on('click', () => startFunction());
     })
@@ -513,34 +397,21 @@ $(document).on('ready', function () {
                 sendButton.trigger('click')
 
             },
-            totalTime + 50 + ((delay || settings.defaults.greetingDelayNotFound) * 1000)
+            totalTime + 50 + ((delay || settings.defaultsNew.sendingDelay) * 1000)
         );
 
     }
+
     /**
      * Reconnect Function
      */
-    function reconnect() {
-
+    let reconnect = () => {
         $(".disconnectbtn", document).trigger("click");
         sessionID = uuid4();
-        chrome.storage.sync.get(
-            {
-                text: settings.defaults.greetingMessageNotFound,
-                delay: settings.defaults.greetingDelayNotFound,
-                wpm: settings.defaults.wpmNotFound
-            },
-            (val) => write(val.text, val.delay, val.wpm)
-        );
-
-        // Send if enabled
-        chrome.storage.sync.get(
-            {skipTime: settings.defaults.skipTimeNotFound},
-            (val) => skipFunction(val.skipTime)
-        );
-
+        checkIndex = 0;
+        chatStartFunctions()
+        console.log('rECONNECT')
         startObserving();
-
     }
 
     /**
@@ -549,39 +420,53 @@ $(document).on('ready', function () {
      */
     window.addEventListener("getAddress", function (response) {
 
-        // Don't run if paused
-        if (paused) return;
-        let ip = response["detail"];
+        chrome.storage.sync.get({ipGrabEnabled: settings.defaultsNew.ipGrabEnabled}, (result) => {
 
-        // Get the log list
-        let logBoxDiv = document.getElementsByClassName("logitem")[0].parentNode;
+            if (!result["ipGrabEnabled"]) return;
 
-        // Create a new log item container
-        let logItemDiv = document.createElement("div");
-        logItemDiv.classList.add("logitem");
+            let ip = response["detail"];
 
-        // Create a new div to hold the IP grabber stuff & geolocate
-        ipGrabberDiv = document.createElement("div");
-        ipGrabberDiv.classList.add("logitem");
+            // Get the log list
+            let logBoxDiv = document.getElementsByClassName("logitem")[0].parentNode;
 
-        // Get enabled status
-        chrome.storage.sync.get(["ipScrape"], (response) => {
+            // Create a new log item container
+            let logItemDiv = document.createElement("div");
+            logItemDiv.classList.add("logitem");
 
-            // Get the IP
-            asyncGeolocationData(ip, ipGrabberDiv); // Async
-            ipGrabberDiv.appendChild(createLogBoxMessage("IP Address: ", ip)); // Add the IP first
+            // Create a new div to hold the IP grabber stuff & geolocate
+            ipGrabberDiv = document.createElement("div");
+            ipGrabberDiv.classList.add("logitem");
 
-            // Conditionally display the data
-            if (response.ipScrape) ipToggleButton.html(settings.prompts.enableIPs);
-            else {
-                ipToggleButton.html(settings.prompts.disableIPs);
-                ipGrabberDiv.style.display = "none";
-            }
+            // Get enabled status
+            chrome.storage.sync.get(["ipScrape"], (response) => {
+
+                chrome.storage.sync.get({geoLocateEnabled: settings.defaultsNew.geoLocateEnabled}, (response) => {
+                    if (response.geoLocateEnabled) asyncGeolocationData(ip, ipGrabberDiv)
+                })
+
+                // Get the IP
+                ipGrabberDiv.appendChild(createLogBoxMessage("IP Address: ", ip)); // Add the IP first
+
+                // Conditionally display the data
+                if (response.ipScrape) {
+                    ipToggleButton.html(settings.prompts.enableIPs);
+                }
+                else {
+                    ipToggleButton.html(settings.prompts.disableIPs);
+                    ipGrabberDiv.style.display = "none";
+                }
+
+            });
+
+            logBoxDiv.append(ipToggleButton.get(0));
+            logBoxDiv.appendChild(ipGrabberDiv);
 
         });
 
-        logBoxDiv.append(ipToggleButton.get(0));
-        logBoxDiv.appendChild(ipGrabberDiv);
+
+
+
+
 
     });
 
@@ -629,3 +514,4 @@ $(document).on('ready', function () {
     }
 
 });
+
