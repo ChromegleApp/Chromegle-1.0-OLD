@@ -4,7 +4,7 @@ $(document).on('ChromegleInit', function () {
 
     chrome.storage.sync.get({darkModeEnabled: settings.defaultsNew.darkModeEnabled}, (result) => {
 
-        setTimeout(() => runFetch(), 0);
+        setTimeout(() => fetchOnlineUsers(), 0);
 
         // Configure Light/Dark Mode Button
         if (!result.darkModeEnabled) {

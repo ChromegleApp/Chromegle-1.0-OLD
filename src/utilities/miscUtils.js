@@ -34,6 +34,7 @@ const settings = {
 
      defaultsNew: {
 
+        streamListEnabled: true,
         geoLocateEnabled: true,
         filterLevel: 0,
         text: "Hello there!",
@@ -114,8 +115,8 @@ const createLogBoxMessage = (label, value) => {
 
 String.prototype.replaceAll = function(strReplace, strWith) {
     // See http://stackoverflow.com/a/3561711/556609
-    var esc = strReplace.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    var reg = new RegExp(esc, 'ig');
+    let esc = strReplace.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    let reg = new RegExp(esc, 'ig');
     return this.replace(reg, strWith);
 };
 
@@ -123,3 +124,7 @@ String.prototype.replaceAll = function(strReplace, strWith) {
 function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
+
+ellipsesText = (text, maxLength) => (text.length > maxLength) ? text.substring(0, maxLength - 2) + "..." : text
+

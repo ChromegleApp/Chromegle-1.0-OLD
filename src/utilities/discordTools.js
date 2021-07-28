@@ -1,8 +1,8 @@
-let runFetch = () => {
+let fetchOnlineUsers = () => {
     let omegleOnlineDiv = document.getElementById("onlinecount");
     let omegleOC = omegleOnlineDiv.childNodes.item(0)
     if (omegleOC == null) {
-        return setTimeout(() => runFetch(), 500)
+        return setTimeout(() => fetchOnlineUsers(), 500)
     }
 
     let omegleOCText = omegleOC.innerHTML;

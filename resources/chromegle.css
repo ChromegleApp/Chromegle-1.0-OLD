@@ -93,3 +93,11 @@ html {
 	background-size: inherit;
 	height: inherit; width: inherit;
 }
+
+.streamerDiv {
+	margin-left: 15px;
+	position: absolute;
+	top: 50%;
+	-ms-transform: translateY(-50%);
+	transform: translateY(-50%);
+}

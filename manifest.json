@@ -27,6 +27,7 @@
         "src/modules/settings.js",
         "src/modules/themes.js",
         "src/modules/topics.js",
+        "src/modules/streaming.js",
 
         "src/utilities/banHandling.js",
         "src/utilities/discordTools.js",

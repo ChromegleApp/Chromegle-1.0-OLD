@@ -209,6 +209,30 @@ $(document).on('ChromegleInit', () => {setTimeout(() => {
     }
 
     /**
+     * Stream List Toggle
+     */
+    {
+        let streamListToggle = document.getElementById("streamListToggle");
+        toggleInitial(streamListToggle, "streamListEnabled", settings.defaultsNew.streamListEnabled)
+        $(streamListToggle).on('click', () => {
+
+            // Toggle it
+            toggleSwitch(streamListToggle, "streamListEnabled")
+
+            // Update the box on screen
+            chrome.storage.sync.get({"streamListEnabled": settings.defaultsNew.streamListEnabled}, (response) => {
+                let streamBox = document.getElementById("innerStreamingDiv");
+
+                // Move it off the screen (toggle this)
+                if (response.streamListEnabled) streamBox.style.display = "block";
+                else streamBox.style.display = "none";
+
+            })
+
+        });
+    }
+
+    /**
      * Filter Multi-Level Toggle System
      */
     {
@@ -279,6 +303,13 @@ const toggleSettingsModal = () => {
         if (introBox.style.display === 'none') introBox.style.display = 'block';
         else introBox.style.display = 'none';
 
+    }
+
+    // Toggle streaming box
+    let streamingDiv = document.getElementById("streamingDiv");
+    if (streamingDiv !== null) {
+        if (streamingDiv.style.display === 'none') streamingDiv.style.display = 'block';
+        else streamingDiv.style.display = 'none';
     }
 
 }
