@@ -246,7 +246,7 @@ $(document).on('ChromegleInit', () => {setTimeout(() => {
         let disableButton = (element, className) => {
             if (element.classList.contains(className)) {
                 element.classList.toggle(className);
-                element.innerHTML = "Enable";
+                element.innerHTML = "Disabled";
             }
 
         }
@@ -261,7 +261,7 @@ $(document).on('ChromegleInit', () => {setTimeout(() => {
                 // Edit the initial button
                 if (result.filterLevel === filterKey) {
                     filterType.classList.toggle('editToggleEnabled');
-                    filterType.innerHTML = "Disable"
+                    filterType.innerHTML = "Enabled"
                 }
 
 
@@ -269,7 +269,7 @@ $(document).on('ChromegleInit', () => {setTimeout(() => {
 
                     // Toggle THIS button
                     filterType.classList.toggle('editToggleEnabled');
-                    filterType.innerHTML = (filterType.innerHTML === "Enable") ? "Disable" : "Enable";
+                    filterType.innerHTML = (filterType.innerHTML === "Disabled") ? "Enabled" : "Disabled";
 
                     // Disable the OTHER images 100% of the time
                     let filterTypesCopy = filterTypes.filter(object => object.item !== filterType);
@@ -278,7 +278,7 @@ $(document).on('ChromegleInit', () => {setTimeout(() => {
                     filterTypesCopy.forEach((element) => disableButton(element.item, 'editToggleEnabled'));
 
                     // Update storage based on the status of this button
-                    chrome.storage.sync.set({filterLevel: (filterType.innerHTML === "Enable") ? -1 : filterKey});
+                    chrome.storage.sync.set({filterLevel: (filterType.innerHTML === "Disabled") ? -1 : filterKey});
 
                 });
 
@@ -319,16 +319,16 @@ const toggleSwitch = (element, storageField) => {
     let toggleChange = {}
 
     // Enable it
-    if (element.innerHTML === "Enable")
+    if (element.innerHTML === "Disabled")
     {
-        element.innerHTML = "Disable"
+        element.innerHTML = "Enabled"
         toggleChange[storageField] = true;
     }
 
     // Disable it
     else
     {
-        element.innerHTML = "Enable"
+        element.innerHTML = "Disabled"
         toggleChange[storageField] = false;
     }
 
@@ -345,7 +345,7 @@ const toggleInitial = (element, storageField, storageFieldDefault) => {
 
         if (result[storageField]) {
             element.classList.toggle('editToggleEnabled');
-            element.innerHTML = "Disable"
+            element.innerHTML = "Enabled"
         }
 
     })

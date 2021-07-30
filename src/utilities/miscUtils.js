@@ -52,6 +52,7 @@ const settings = {
     // Constant values that do not change
     constants: {
 
+        streamingAPIURL: "https://cdn.isaackogan.com/streaming",
         lettersPerWord: 8,
         discordInviteURL: "https://discord.gg/TRCNZ5vuwM",
         discordGuildID: "798632874776985660",
@@ -114,7 +115,6 @@ const createLogBoxMessage = (label, value) => {
 }
 
 String.prototype.replaceAll = function(strReplace, strWith) {
-    // See http://stackoverflow.com/a/3561711/556609
     let esc = strReplace.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     let reg = new RegExp(esc, 'ig');
     return this.replace(reg, strWith);

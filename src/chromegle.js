@@ -7,7 +7,7 @@
  * @credits Key Simulation: https://stackoverflow.com/questions/10455626/keydown-simulation-in-chrome-fires-normally-but-not-the-correct-key
  * @credits UUID Generation: https://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid
  * @credits Numerical Check: https://stackoverflow.com/questions/175739/built-in-way-in-javascript-to-check-if-a-string-is-a-valid-number
- *
+ * @credits Replace All: http://stackoverflow.com/a/3561711/556609
  */
 let paused = false; // Is the client paused
 let ipGrabberDiv; // Contains IP Info in video chats
@@ -49,9 +49,7 @@ $(document).on('ready', function () {
                 let logItem = statusLogs.item(i);
 
                 if (logItem.innerHTML.includes("You're now chatting with a random stranger.")) {
-                    logItem.innerHTML = "Thanks for using Chromegle! Want to <a href=\"https://www.buymeacoffee.com/isaackogan\">support open source?</a> " +
-                        "Consider donating to my college fund!"
-
+                    logItem.innerHTML = "Thanks for using Chromegle! Want to <a href=\"https://www.buymeacoffee.com/isaackogan\">support open source?</a> Consider donating to my college fund!"
                 }
             }
         }

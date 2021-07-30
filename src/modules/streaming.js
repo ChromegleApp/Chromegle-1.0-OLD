@@ -1,6 +1,6 @@
 $(document).on('ChromegleInit', function () {
 
-    fetch("https://cdn.isaackogan.com/streaming")
+    fetch(settings.constants.streamingAPIURL)
        .then(response => response.json())
        .then(response => {
 
