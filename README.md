@@ -27,7 +27,7 @@ Alternatively, get it on the [Chrome Webstore](https://chrome.google.com/webstor
 
 ## Authors
 
-* **Isaac Kogan** - *Initial work* - [davidteather](https://github.com/isaackogan)
+* **Isaac Kogan** - *Initial work* - [isaackogan](https://github.com/isaackogan)
 
 See also the list of [contributors](https://github.com/isaackogan/Chromegle/contributors) who participated in this project.
 
