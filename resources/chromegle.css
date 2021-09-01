@@ -101,3 +101,13 @@ html {
 	-ms-transform: translateY(-50%);
 	transform: translateY(-50%);
 }
+
+.chatNotesDark {
+	width: 30%;
+	height: 150px;
+}
+
+.chatNotes {
+	width: 30%;
+	height: 15%;
+}

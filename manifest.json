@@ -6,7 +6,7 @@
   "homepage_url": "https://github.com/isaackogan",
 
   "manifest_version": 3,
-  "version": "1.1.69.420",
+  "version": "1.1.420.69",
   "icons": {"16": "resources/images/extensionLogo.png", "48": "resources/images/extensionLogo.png", "128": "resources/images/extensionLogo.png"},
 
   "content_scripts": [
@@ -18,6 +18,7 @@
       "js": [
 
         "resources/libraries/jquery-2.1.1.min.js",
+        "resources/libraries/jquery-ui-1.11.1.min.js",
         "resources/libraries/js-cookie@2.2.1.js",
 
         "src/chromegle.js",

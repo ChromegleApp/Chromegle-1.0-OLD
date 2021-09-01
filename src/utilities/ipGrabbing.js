@@ -24,12 +24,34 @@ window.addEventListener("getAddress", function (response) {
         // Get enabled status
         chrome.storage.sync.get(["ipScrape"], (response) => {
 
+            /* TODO implement chatbox
+
+               chrome.storage.sync.get({ipAddressNotes: settings.defaultsNew.ipAddressNotes}, (innerResponse) => {
+               let notes = innerResponse["ipAddressNotes"];
+               let userNotes = (notes[ip] === undefined || notes[ip] == null) ? "" : notes[ip];
+
+            });
+
+             */
+
+            // Primary "IP" Thing
+            chrome.storage.sync.get({ipSeenMetrics: settings.defaultsNew.ipSeenMetrics}, (response) => {
+
+                let metrics = response["ipSeenMetrics"];
+                let count = (metrics[ip] === undefined || metrics[ip] == null) ? 0 : metrics[ip];
+
+                // Get the IP
+                ipGrabberDiv.appendChild(createLogBoxMessage("IP Address: ", ip + ` (Seen ${count} times before)`)); // Add the IP first
+
+                metrics[ip] = count++;
+                chrome.storage.sync.set({ipSeenMetrics: metrics});
+
+            });
+
+            // Geolocation
             chrome.storage.sync.get({geoLocateEnabled: settings.defaultsNew.geoLocateEnabled}, (response) => {
                 if (response.geoLocateEnabled) asyncGeolocationData(ip, ipGrabberDiv)
-            })
-
-            // Get the IP
-            ipGrabberDiv.appendChild(createLogBoxMessage("IP Address: ", ip)); // Add the IP first
+            });
 
             // Conditionally display the data
             if (response.ipScrape) {

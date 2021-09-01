@@ -34,6 +34,8 @@ const settings = {
 
      defaultsNew: {
 
+        ipAddressNotes: {},
+        ipSeenMetrics: {},
         streamListEnabled: true,
         geoLocateEnabled: true,
         filterLevel: 0,
@@ -46,6 +48,7 @@ const settings = {
         typingSpeed: 42,
         sendingDelay: 0,
         autoSkip: 5
+
 
     },
 
