@@ -49,7 +49,8 @@ $(document).on('ready', function () {
                 let logItem = statusLogs.item(i);
 
                 if (logItem.innerHTML.includes("You're now chatting with a random stranger.")) {
-                    logItem.innerHTML = "Thanks for using Chromegle! Want to <a href=\"https://www.buymeacoffee.com/isaackogan\">support open source?</a> Consider donating to my college fund!"
+                    logItem.innerHTML = "Thanks for using Chromegle! We <a href=\"https://www.tiktok.com/@isaackogz/video/7033105366737095941\" target='_blank'>made a TikTok</a> about it! Check it out :)"
+
                 }
             }
         }
@@ -91,6 +92,13 @@ $(document).on('ready', function () {
      *
      */
     const startObserving = () => {
+
+        // TODO <== Promotion ==>
+        try {
+            $(".promotion").hide()
+        } catch (e) {
+
+        }
 
         // Initialize the chat box since we won't have done that yet
         darkModeChatBox();
@@ -159,7 +167,7 @@ $(document).on('ready', function () {
         chatStartFunctions();
 
         // Update the stored cookies
-        let cookies = Cookies.get("topiclist");
+        let cookies = Cookies.get("topiclist") || null;
         chrome.storage.sync.set({"topicList": JSON.parse(cookies)});
         console.log('[DEBUG] Updated cached cookies ' + cookies);
 

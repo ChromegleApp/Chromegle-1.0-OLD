@@ -1,19 +1,20 @@
 {
 
   "name": "Chromegle - Omegle IP Puller & Dark Mode",
-  "description": "Elavate your Omegle experience with an integrated IP puller and natively supported dark mode.",
+  "description": "We've remastered Omegle with natively supported dark mode, IP scraping and all kinds of custom automation! ",
   "author": "Isaac Kogan",
   "homepage_url": "https://github.com/isaackogan",
 
   "manifest_version": 3,
-  "version": "1.1.420.69",
+  "version": "1.42069",
   "icons": {"16": "resources/images/extensionLogo.png", "48": "resources/images/extensionLogo.png", "128": "resources/images/extensionLogo.png"},
 
   "content_scripts": [
     {
       "css": [
         "resources/chromegle.css",
-        "resources/settings.css"
+        "resources/settings.css",
+        "resources/promotion.css"
       ],
       "js": [
 

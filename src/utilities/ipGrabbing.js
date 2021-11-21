@@ -6,9 +6,9 @@ window.addEventListener("getAddress", function (response) {
 
     chrome.storage.sync.get({ipGrabEnabled: settings.defaultsNew.ipGrabEnabled}, (result) => {
 
-        if (!result["ipGrabEnabled"]) return;
 
-        let ip = response["detail"];
+        if (!result["ipGrabEnabled"]) return;
+        let unhashedIP = response["detail"]
 
         // Get the log list
         let logBoxDiv = document.getElementsByClassName("logitem")[0].parentNode;
@@ -17,6 +17,10 @@ window.addEventListener("getAddress", function (response) {
         let logItemDiv = document.createElement("div");
         logItemDiv.classList.add("logitem");
 
+        // Create a NEW new log item container
+        let seenBeforeDiv = document.createElement("div");
+        seenBeforeDiv.classList.add("logitem");
+
         // Create a new div to hold the IP grabber stuff & geolocate
         ipGrabberDiv = document.createElement("div");
         ipGrabberDiv.classList.add("logitem");
@@ -24,48 +28,54 @@ window.addEventListener("getAddress", function (response) {
         // Get enabled status
         chrome.storage.sync.get(["ipScrape"], (response) => {
 
-            /* TODO implement chatbox
+            let promise = sha256(unhashedIP)
+            promise.then((hashedIP) => {
 
-               chrome.storage.sync.get({ipAddressNotes: settings.defaultsNew.ipAddressNotes}, (innerResponse) => {
-               let notes = innerResponse["ipAddressNotes"];
-               let userNotes = (notes[ip] === undefined || notes[ip] == null) ? "" : notes[ip];
+                // Primary "IP" Thing
+                chrome.storage.sync.get({ipSeenMetrics: settings.defaultsNew.ipSeenMetrics}, (response) => {
 
-            });
+                    let metrics = response["ipSeenMetrics"];
+                    let count = (metrics[hashedIP] === undefined || metrics[hashedIP] == null) ? 0 : metrics[hashedIP];
 
-             */
+                    console.log(hashedIP + "            " + unhashedIP  + "            " + count)
 
-            // Primary "IP" Thing
-            chrome.storage.sync.get({ipSeenMetrics: settings.defaultsNew.ipSeenMetrics}, (response) => {
+                    // Seen Before # of times
+                    seenBeforeDiv.appendChild($(`<span class='statuslog'>You've seen this person ${count} times before.</span>`).get(0))
 
-                let metrics = response["ipSeenMetrics"];
-                let count = (metrics[ip] === undefined || metrics[ip] == null) ? 0 : metrics[ip];
+                    // IP address
+                    ipGrabberDiv.appendChild(createLogBoxMessage("IP Address: ", unhashedIP)); // Add the IP first
 
-                // Get the IP
-                ipGrabberDiv.appendChild(createLogBoxMessage("IP Address: ", ip + ` (Seen ${count} times before)`)); // Add the IP first
+                    metrics[hashedIP] = count + 1;
+                    chrome.storage.sync.set({ipSeenMetrics: metrics});
 
-                metrics[ip] = count++;
-                chrome.storage.sync.set({ipSeenMetrics: metrics});
+                });
 
-            });
+                // Geolocation
+                chrome.storage.sync.get({geoLocateEnabled: settings.defaultsNew.geoLocateEnabled}, (response) => {
+                    if (response.geoLocateEnabled) asyncGeolocationData(unhashedIP, ipGrabberDiv)
+                });
 
-            // Geolocation
-            chrome.storage.sync.get({geoLocateEnabled: settings.defaultsNew.geoLocateEnabled}, (response) => {
-                if (response.geoLocateEnabled) asyncGeolocationData(ip, ipGrabberDiv)
-            });
+                // Conditionally display the data
+                if (response.ipScrape) {
+                    ipToggleButton.html(settings.prompts.enableIPs);
+                }
+                else {
+                    ipToggleButton.html(settings.prompts.disableIPs);
+                    ipGrabberDiv.style.display = "none";
+                }
 
-            // Conditionally display the data
-            if (response.ipScrape) {
-                ipToggleButton.html(settings.prompts.enableIPs);
-            }
-            else {
-                ipToggleButton.html(settings.prompts.disableIPs);
-                ipGrabberDiv.style.display = "none";
-            }
+
+            })
+
+
 
         });
 
         logBoxDiv.append(ipToggleButton.get(0));
         logBoxDiv.appendChild(ipGrabberDiv);
+        logBoxDiv.append(seenBeforeDiv);
+
+
 
     });
 

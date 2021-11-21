@@ -16,7 +16,7 @@ const settings = {
     // Default values for configuration
     defaults: {
 
-        greetingMessageNotFound: "Hello there!",
+        greetingMessageNotFound: "Hello there! My name is Demetrius Demarcus Bartholomew James the third Jr.",
         darkModeNotFound: false,
         greetingDelayNotFound: 0,
         wpmNotFound: 40,
@@ -39,7 +39,7 @@ const settings = {
         streamListEnabled: true,
         geoLocateEnabled: true,
         filterLevel: 0,
-        text: "Hello there!",
+        text: "Hello there! My name is Demetrius Demarcus Bartholomew James the third Jr.",
         darkModeEnabled: false,
         ipGrabEnabled: true,
         autoReconnectEnabled: true,
@@ -131,3 +131,16 @@ function numberWithCommas(x) {
 
 ellipsesText = (text, maxLength) => (text.length > maxLength) ? text.substring(0, maxLength - 2) + "..." : text
 
+async function sha256(message) {
+    // encode as UTF-8
+    const msgBuffer = new TextEncoder().encode(message);
+
+    // hash the message
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+
+    // convert ArrayBuffer to Array
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+    // convert bytes to hex string
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}

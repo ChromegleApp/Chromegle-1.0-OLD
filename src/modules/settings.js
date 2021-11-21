@@ -76,6 +76,30 @@ $(document).on('ChromegleInit', () => {setTimeout(() => {
     $("#modalLogo").on('click', () => window.open(settings.constants.discordInviteURL))
 
     /**
+     * Greeting text message
+     */
+    {
+        // Set greeting text
+        let greetingButton = document.getElementById("greetingButton");
+        $(greetingButton).on('click', function () {
+
+                chrome.storage.sync.get(["text", "delay", "wpm"], function (val) {
+
+                    let newGreeting = prompt(
+                        settings.prompts.greetingMessage,
+                        (val.text === undefined || val.text == null) ? settings.defaults.greetingMessageNotFound : val.text
+                    );
+
+                    if (newGreeting !== null) {
+                        chrome.storage.sync.set({text: newGreeting});
+                    }
+
+                });
+            });
+
+    }
+
+    /**
      * Greeting Toggle Switch
      */
     {
@@ -332,6 +356,7 @@ const toggleSwitch = (element, storageField) => {
         toggleChange[storageField] = false;
     }
 
+    console.log(toggleChange)
     chrome.storage.sync.set(toggleChange);
 
 

@@ -1,23 +1,6 @@
 
 // Change the text greeting
-const greetingButton = $("<button class='greetingButton'></button>")
-
-    // Bind the click action to a new function
-    .on('click', function () {
-
-        chrome.storage.sync.get(["text", "delay", "wpm"], function (val) {
-
-            let newGreeting = prompt(
-                settings.prompts.greetingMessage,
-                (val.text === undefined || val.text == null) ? settings.defaults.greetingMessageNotFound : val.text
-            );
-
-            if (newGreeting !== null) {
-                chrome.storage.sync.set({text: newGreeting});
-            }
-
-        });
-    });
+const greetingButton = $("<button class='greetingButton'></button>");
 
 
 // Open the settings modal
@@ -33,12 +16,20 @@ const discordButton = $("<button class='customDiscordBanner'></button>")
 
 
 // Show the IP (video chat button)
-const ipToggleButton = $("<button style='margin-bottom: 8px'></button>")
+const ipToggleButton = $("<button class='ipLookupButton' style='margin-bottom: 8px; margin-top: 6px;'></button>")
     // Bind the click action to a new function
     .on('click', () => chrome.storage.sync.get(["ipScrape"], (val) => {
         let enabled = val.ipScrape || settings.defaults.ipScrapeEnabledNotFound;
         ipGrabberDiv.style.display = enabled ? "none" : ""
-        ipToggleButton.html(enabled ? settings.prompts.disableIPs : settings.prompts.enableIPs);
+
+        if (enabled) {
+            ipToggleButton.get(0).classList.add("lookupActive");
+            ipToggleButton.html(settings.prompts.disableIPs);
+        } else {
+            ipToggleButton.html(settings.prompts.enableIPs);
+            ipToggleButton.get(0).classList.remove("lookupActive");
+        }
+
         chrome.storage.sync.set({"ipScrape": !enabled});
     }));
 
